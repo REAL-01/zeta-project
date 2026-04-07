@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель Управления | Zeta Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --surface: rgba(20, 20, 25, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #e91e63;
+            --text: #e0e0e0;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(233, 30, 99, 0.15) 0%, transparent 50%);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; color: #fff; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(233, 30, 99, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(233, 30, 99, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        th, td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.4);
+            color: #aaa;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .role-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .role-admin { background: rgba(233, 30, 99, 0.2); color: #e91e63; }
+        .role-user { background: rgba(33, 150, 243, 0.2); color: #2196F3; }
+        .role-guest { background: rgba(158, 158, 158, 0.2); color: #9e9e9e; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Панель Управления</h1>
+            <div style="color:#aaa; margin-top:10px;">Центр Командования Штаба</div>
+        </div>
+        <div style="display: flex; gap: 15px;">
+            <a href="/admin/" target="_blank" class="btn" style="border-color: rgba(255,152,0,0.3); color: #ff9800; background: rgba(255,152,0,0.1);"><i class="fa-solid fa-database"></i> БД и Баны (Django)</a>
+            <a href="{% url 'index' %}" class="btn"><i class="fa-solid fa-arrow-left"></i> В игру</a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Логин (Командир)</th>
+                <th>Роль</th>
+                <th>Боев</th>
+                <th>Винрейт</th>
+                <th>Казна</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in players %}
+            <tr>
+                <td style="color:#888;">#{{ p.id }}</td>
+                <td style="font-weight:bold; color:#fff;">{{ p.username }}</td>
+                <td>
+                    <span class="role-badge role-{{ p.role }}">{{ p.role }}</span>
+                </td>
+                <td>{{ p.games_played }}</td>
+                <td style="color:#4CAF50;">
+                    {% if p.games_played > 0 %}
+                        {% widthratio p.wins p.games_played 100 %}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </td>
+                <td style="color:#ffd700;"><i class="fa-solid fa-coins"></i> {{ p.playerGold }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" style="text-align:center;">Нет данных о командирах</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

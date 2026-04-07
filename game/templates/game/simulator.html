@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeta Project: WEB strategy</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0A0B0A;
+            --panel-bg: #131412;
+            --primary: #00FF00;
+            --primary-hover: #39FF14;
+            --secondary: #1f201f;
+            --secondary-hover: #292a29;
+            --text-main: #e4e2e0;
+            --text-muted: #84967c;
+        }
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #app {
+            display: flex;
+            margin: auto;
+            gap: 25px;
+            background: var(--panel-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            
+        }
+        #left-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        h2, h3, .rank-name, button, .modal-list-item b {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 1.4rem;
+            letter-spacing: 1.5px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        .info-block {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        .info-item label, .info-item span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .info-item input {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .info-item input:focus {
+            border-color: var(--primary);
+        }
+        .info-item strong {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        
+        .profile-card {
+            background: linear-gradient(145deg, #1b1c1b, #0d0e0d);
+            padding: 20px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .rank-display {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+        }
+        .rank-display img {
+            height: 90px;
+            width: auto;
+            max-width: 140px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.7));
+            transition: transform 0.3s;
+        }
+        .rank-display img:hover {
+            transform: scale(1.05);
+        }
+        .profile-name {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #555;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            width: 85%;
+            margin-bottom: 8px;
+            padding: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .profile-name:focus {
+            border-bottom-color: var(--primary);
+        }
+        .rank-name {
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+        }
+        .xp-container {
+            text-align: left;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .xp-text {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .xp-bar-bg {
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #02e600, #00FF00);
+            width: 0%;
+            transition: width 0.4s ease-out;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .stats-card {
+            background: #222;
+            border-radius: 10px;
+            padding: 12px 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+            border: 1px solid #3c3c3c;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-item i {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        button, .btn-link {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-sizing: border-box;
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:hover, .btn-link:hover {
+            filter: brightness(1.1);
+        }
+        button:active, .btn-link:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
+        #game-messages {
+            margin-top: 15px;
+            flex-grow: 1;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            font-size: 0.85rem;
+            overflow-y: auto;
+            height: 140px; 
+            font-family: 'Consolas', 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+        }
+        .msg { margin-bottom: 6px; line-height: 1.3; }
+        .msg-dmg { color: #ff5252; }
+        .msg-heal { color: #69f0ae; }
+        .msg-sys { color: #ffeb3b; font-weight: bold; }
+        #right-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        canvas {
+            background: #2a3b22;
+            border-radius: 8px;
+            border: 3px solid #444;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
+        
+        #turn-indicator {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+            z-index: 10;
+            display: none;
+            text-shadow: 0 0 5px rgba(0,255,0,0.5);
+            transition: all 0.3s;
+        }
+        #turn-indicator.enemy-turn {
+            border-color: #f44336;
+            color: #f44336;
+            text-shadow: 0 0 5px rgba(244,67,54,0.5);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            background: rgba(0,0,0,0.8); 
+            z-index: 100; 
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1e1e1e; padding: 25px; 
+            border-radius: 12px; border: 2px solid var(--primary); 
+            color: white; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            transition: all 0.3s;
+        }
+        .modal-content.wide {
+            min-width: 90vw;
+            max-width: 1200px;
+        }
+        .btn-hire {
+            background: #333;
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        .btn-hire:hover:not(:disabled) {
+            background: #222;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .modal-list-item {
+            padding: 12px; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 15px;
+        }
+        .icon-circle {
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 40px; height: 40px; border-radius: 50%; background: #333;
+            font-size: 1.2rem;
+        }
+        
+        .tech-tree-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .tech-tree-container::-webkit-scrollbar { height: 8px; }
+        .tech-tree-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        
+        .tech-column {
+            flex: 0 0 auto;
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .tech-col-title {
+            color: var(--primary);
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            width: 100%;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .tech-node {
+            background: #111;
+            border: 2px solid #444;
+            border-radius: 6px;
+            padding: 12px 10px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+        .tech-node:hover { transform: scale(1.05); }
+        .tech-node.locked { border-color: #f44336; opacity: 0.6; filter: grayscale(1); }
+        .tech-node.ready { border-color: #ffeb3b; }
+        .tech-node.researched { border-color: var(--primary); box-shadow: 0 0 12px rgba(0,255,0,0.4); }
+        
+        
+        .tech-node:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: -27px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 25px;
+            background: #444;
+            z-index: 0;
+        }
+        .tech-node.researched:not(:last-child)::after { background: var(--primary); box-shadow: 0 0 8px var(--primary); }
+
+        
+        
+        @media (max-width: 1000px) {
+            #app {
+                flex-direction: column;
+                padding: 15px;
+                width: 100%;
+                box-sizing: border-box;
+                gap: 15px;
+            }
+            #left-panel, #right-panel {
+                display: contents; 
+            }
+            .mobile-order-1 { order: 1; width: 100%; } 
+            .mobile-order-2 { order: 2; position: static !important; transform: none !important; align-self: center; margin-bottom: -10px; margin-top:10px; } 
+            .mobile-order-3 { order: 3; align-self: center; width: 100%; } 
+            .mobile-order-4 { order: 4; width: 100%; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; } 
+            .mobile-order-5 { order: 5; width: 100%; } 
+            .mobile-order-6 { order: 6; width: 100%; } 
+            .mobile-order-7 { order: 7; width: 100%; } 
+            
+            canvas {
+                width: 100%;
+                max-width: 540px;
+                height: auto;
+                aspect-ratio: 1 / 1;
+            }
+            .modal-content {
+                width: 95% !important;
+                padding: 15px;
+                box-sizing: border-box;
+            }
+            
+            .btn-link, button { margin-top: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="left-panel">
+            <div class="mobile-order-1" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Zeta Project <span style="font-size:0.6rem; color:#aaa;">v0.0.2</span></h2>
+                <a href="{% url 'logout' %}" style="color:#f44336; text-decoration:none; font-size:0.9rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-right-from-bracket"></i> Выход</a>
+            </div>
+            
+            <div class="profile-card mobile-order-6">
+                <div class="rank-display">
+                    <img id="player-rank-icon" src="/static/rank_icons/1_private.png" alt="Rank">
+                </div>
+                <input type="text" id="player-name-input" value="{{ username }}" placeholder="Позывной" class="profile-name" disabled>
+                <div class="rank-name" id="player-rank">Рядовой</div>
+                
+                <div class="xp-container">
+                    <div class="xp-text"><span>Опыт:</span> <strong style="color:#fff;"><span id="player-xp">0</span> / <span id="next-rank-xp">100</span></strong></div>
+                    <div class="xp-bar-bg">
+                        <div class="xp-bar-fill" id="xp-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card mobile-order-5">
+                <div class="stat-item" style="color: #4CAF50">
+                    <i class="fa-solid fa-users"></i>
+                    <div class="stat-label">Войска</div>
+                    <div class="stat-value" id="unit-cap-cnt">0/3</div>
+                </div>
+                <div class="stat-item" style="color: #ffeb3b">
+                    <i class="fa-solid fa-flask"></i>
+                    <div class="stat-label">Наука</div>
+                    <div class="stat-value" id="lightbulbs-cnt">0</div>
+                </div>
+                <div class="stat-item" style="color: #ffd700">
+                    <i class="fa-solid fa-coins"></i>
+                    <div class="stat-label">Казна</div>
+                    <div class="stat-value" id="gold-cnt">0</div>
+                </div>
+            </div>
+
+            <div class="mobile-order-4">
+                <button id="hire-btn" style="background-color: #2196F3;" onclick="openModal('hire')"><i class="fa-solid fa-person-military-rifle"></i> Нанять Юнитов</button>
+                <button id="research-btn" style="background-color: #9C27B0; margin-top: 10px;" onclick="openModal('research')"><i class="fa-solid fa-microchip"></i> Инженерия</button>
+                
+                <button id="end-turn-btn" style="background-color: var(--secondary); margin-top: 10px;"><i class="fa-solid fa-hourglass-end"></i> Завершить ход</button>
+                <button id="new-battle-btn" style="background-color: #555; margin-top: 10px;"><i class="fa-solid fa-rotate-right"></i> Новая битва</button>
+                
+                <a href="{% url 'profile' %}" class="btn-link" style="background-color: #009688; margin-top: 10px;"><i class="fa-solid fa-user"></i> Профиль</a>
+                {% if request.user.role == 'admin' %}
+                <a href="{% url 'custom_admin' %}" class="btn-link" style="background-color: #e91e63; margin-top: 10px;"><i class="fa-solid fa-user-shield"></i> Админ-Панель</a>
+                {% endif %}
+            </div>
+            
+            <div id="game-messages" class="mobile-order-7">
+                <div id="messages-content"></div>
+            </div>
+        </div>
+        
+        <div id="right-panel">
+            <div id="turn-indicator" class="mobile-order-2">Ожидание оппонента...</div>
+            <div class="mobile-order-3" style="display:flex; justify-content:center;">
+                <canvas id="game-canvas" width="540" height="540"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div id="modal-container" class="modal-overlay">
+       <div class="modal-content" style="width: 480px;">
+           <h3 id="modal-title" style="margin-top:0; color:#4CAF50; border-bottom: 2px solid #333; padding-bottom:10px;">Меню</h3>
+           <div id="modal-body" style="margin-bottom: 20px; max-height: 440px; overflow-y:auto; overflow-x: hidden;">
+           </div>
+           <div style="text-align: right;">
+               <button onclick="closeModal()" style="background:#555;"><i class="fa-solid fa-xmark"></i> Закрыть</button>
+           </div>
+       </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const CELL_SIZE = 60;
+        const GRID_SIZE = 9;
+        
+        const COLORS = {
+            grid1: '#2a3b22',
+            grid2: '#354a2b',
+            player: '#2196F3',
+            enemy: '#F44336',
+            text: '#ffffff',
+            highlightMove: 'rgba(76, 175, 80, 0.4)',
+            highlightAttack: 'rgba(244, 67, 54, 0.4)',
+            highlightSelect: 'rgba(255, 235, 59, 0.7)'
+        };
+
+        const ranks = [
+            { name: "Рядовой", xp: 0, icon: "1_private.png" },
+            { name: "Ефрейтор", xp: 250, icon: "2_efreytor.png" },
+            { name: "Мл. Сержант", xp: 500, icon: "3_jsergeant.png" },
+            { name: "Сержант", xp: 750, icon: "4_sergeant.png" },
+            { name: "Ст. Сержант", xp: 1000, icon: "5_ssergeant.png" },
+            { name: "Старшина", xp: 1150, icon: "6_starshina.png" },
+            { name: "Прапорщик", xp: 1400, icon: "7_praporshik.png" },
+            { name: "Ст. Прапорщик", xp: 1600, icon: "8_spraporshik.png" },
+            { name: "Мл. Лейтенант", xp: 2000, icon: "9_jleytenant.png" },
+            { name: "Лейтенант", xp: 2250, icon: "10_leytenant.png" },
+            { name: "Ст. Лейтенант", xp: 2500, icon: "11_sleytenant.png" },
+            { name: "Капитан", xp: 3000, icon: "12_captain.png" },
+            { name: "Майор", xp: 3500, icon: "13_major.png" },
+            { name: "Подполковник", xp: 4250, icon: "14_jcolonel.png" },
+            { name: "Полковник", xp: 5000, icon: "15_colonel.png" },
+            { name: "Генерал-Майор", xp: 6000, icon: "16_genmaj.png" },
+            { name: "Генерал-Лейтенант", xp: 7250, icon: "17_genliet.png" },
+            { name: "Генерал-Полковник", xp: 8500, icon: "18_gencol.png" },
+            { name: "Генерал Армии", xp: 9500, icon: "19_genarmy.png" },
+            { name: "Генералиссимус", xp: 12000, icon: "20_generalisimus.png" }
+        ];
+
+        const SVG_PATHS = {
+            'hq': "M12 1L8.5 8H1L7 12.5L4.5 20L12 15L19.5 20L17 12.5L23 8H15.5L12 1Z",
+            'infantry': "M12 2C9.8 2 8 3.8 8 6S9.8 10 12 10 16 8.2 16 6 14.2 2 12 2M6 11C4.3 11 3 12.3 3 14V22H21V14C21 12.3 19.7 11 18 11H6Z",
+            'tank': "M19 13V11H16V9A2 2 0 0 0 14 7H11V5H9V7H6A2 2 0 0 0 4 9V11H2V13H4V15A2 2 0 0 0 6 17H18A2 2 0 0 0 20 15V13H19M7 15V13H9V15H7M11 15V13H13V15H11M15 15V13H17V15H15Z",
+            'artillery': "M10 2h4v10h2v-2h3v6h-3v-2h-1.5l2.5 7h-3l-1.5-4.5L11.5 21h-3l2.5-7H9v2H6v-6h3v2h1V2z",
+            'air': "M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z"
+        };
+        const buildSvg = (path) => `<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" style="position:relative; top:2px;"><path d="${path}"/></svg>`;
+
+        const UNIT_TYPES = {
+            'hq': { name: 'Штаб', cost: 0, hp: 100, dmg: [0,0], move: 0, range: 0, path: SVG_PATHS['hq'], iconHtml: buildSvg(SVG_PATHS['hq']), color: '#555' },
+            'infantry': { name: 'Пехота', cost: 15, hp: 15, dmg: [4, 6], move: 1, range: 1, path: SVG_PATHS['infantry'], iconHtml: buildSvg(SVG_PATHS['infantry']), color: '#2196F3' },
+            'tank': { name: 'Танк', cost: 40, hp: 40, dmg: [8, 12], move: 1, range: 1, path: SVG_PATHS['tank'], iconHtml: buildSvg(SVG_PATHS['tank']), color: '#1976D2' },
+            'artillery': { name: 'Артиллерия', cost: 30, hp: 10, dmg: [5, 8], move: 1, range: 2, path: SVG_PATHS['artillery'], iconHtml: buildSvg(SVG_PATHS['artillery']), color: '#0D47A1' },
+            'air': { name: 'Авиация', cost: 50, hp: 20, dmg: [5, 8], move: 2, range: 1, path: SVG_PATHS['air'], iconHtml: buildSvg(SVG_PATHS['air']), color: '#82B1FF' }
+        };
+
+        const TECH_TREE = {
+            'eco1': { id: 'eco1', name: 'Шахты', desc: '+1 Золото/сек', cost: 10, req: [], researched: false },
+            'eco2': { id: 'eco2', name: 'Логистика', desc: 'Старт. Золото +50', cost: 25, req: ['eco1'], researched: false },
+            'eco3': { id: 'eco3', name: 'Банки', desc: '+2 Золота/сек', cost: 45, req: ['eco2'], researched: false },
+            'eco4': { id: 'eco4', name: 'Госзаказ', desc: '+3 Золота/сек', cost: 70, req: ['eco3'], researched: false },
+            
+            'cap1': { id: 'cap1', name: 'Коммутатор', desc: 'Улучшение 1: +1 Лимит', cost: 20, req: [], researched: false },
+            'cap2': { id: 'cap2', name: 'Радиовышка', desc: 'Улучшение 2: +2 Лимит', cost: 50, req: ['cap1'], researched: false },
+            'cap3': { id: 'cap3', name: 'Спутник', desc: 'Улучшение 3: +3 Лимит', cost: 90, req: ['cap2'], researched: false },
+            
+            'inf_hp1': { id: 'inf_hp1', name: 'Броня', desc: '+5 HP Пехоте', cost: 15, req: [], researched: false },
+            'inf_dmg1':{ id: 'inf_dmg1', name: 'Снаряжение', desc: 'Урон пехоты +3', cost: 30, req: ['inf_hp1'], researched: false },
+            'inf_hp2': { id: 'inf_hp2', name: 'Экзоскелет', desc: '+10 HP Пехоте', cost: 55, req: ['inf_dmg1'], researched: false },
+            'inf_rng': { id: 'inf_rng', name: 'Оптика', desc: 'Дальность Пехоты +1', cost: 75, req: ['inf_hp2'], researched: false },
+            
+            'tnk_dmg1':{ id: 'tnk_dmg1', name: 'Снаряды', desc: 'Урон Танков +3', cost: 20, req: [], researched: false },
+            'tnk_hp1': { id: 'tnk_hp1', name: 'Броня Т-1', desc: 'HP Танков +15', cost: 35, req: ['tnk_dmg1'], researched: false },
+            'tnk_dmg2':{ id: 'tnk_dmg2', name: 'Плазма', desc: 'Урон Танков +5', cost: 60, req: ['tnk_hp1'], researched: false },
+            'tnk_hp2': { id: 'tnk_hp2', name: 'Траки', desc: 'HP Танков +25', cost: 85, req: ['tnk_dmg2'], researched: false },
+            
+            'art_dmg1':{ id: 'art_dmg1', name: 'Наведение', desc: 'Урон Арты +5', cost: 25, req: [], researched: false },
+            'art_rng1':{ id: 'art_rng1', name: 'Стволы', desc: 'Дальность Арты +1', cost: 45, req: ['art_dmg1'], researched: false },
+            'art_dmg2':{ id: 'art_dmg2', name: 'Фугас', desc: 'Урон Арты +8', cost: 70, req: ['art_rng1'], researched: false },
+            'art_mgr': { id: 'art_mgr', name: 'Шасси', desc: 'Шаг Арты +1', cost: 95, req: ['art_dmg2'], researched: false },
+            
+            'air_dmg1':{ id: 'air_dmg1', name: 'Пулеметы', desc: 'Урон Авиа +4', cost: 30, req: [], researched: false },
+            'air_hp1': { id: 'air_hp1', name: 'Ловушки', desc: 'HP Авиа +10', cost: 50, req: ['air_dmg1'], researched: false },
+            'air_dmg2':{ id: 'air_dmg2', name: 'Ракеты В-З', desc: 'Урон Авиа +7', cost: 80, req: ['air_hp1'], researched: false },
+            'air_rng1':{ id: 'air_rng1', name: 'Форсаж', desc: 'Шаг Авиа +1', cost: 110, req: ['air_dmg2'], researched: false }
+        };
+
+        let playerXp = {{ player_xp }};
+        let currentRankIdx = {{ current_rank_idx }};
+        let lightbulbs = {{ lightbulbs }};
+        let researchedTechs = '{{ techs }}' ? '{{ techs }}'.split(',') : [];
+        let units = [];
+        let sessionKillsToSave = 0;
+        let turn = 'player'; // in multiplayer this will be 'host' or 'guest'
+        let selectedUnit = null;
+        let gameState = 'playing';
+        let playerGold = {{ gold }};
+        let aiGold = 0;
+
+        const GAME_MODE = '{{ mode|default:"single" }}';
+        const GAME_ROLE = '{{ role|default:"single" }}';
+        const ROOM_ID = {{ room_id|default:"null" }};
+        let mpSyncInterval = null;
+        let isMyTurnMp = false;
+
+        function updateTurnIndicator() {
+            const ind = document.getElementById('turn-indicator');
+            const hireBtn = document.getElementById('hire-btn');
+            const researchBtn = document.getElementById('research-btn');
+            const endTurnBtn = document.getElementById('end-turn-btn');
+
+            if (GAME_MODE !== 'multiplayer') { ind.style.display = 'none'; return; }
+            ind.style.display = 'block';
+            
+            if (isMyTurnMp) {
+                ind.className = '';
+                ind.innerHTML = '<i class="fa-solid fa-check"></i> Ваш ход!';
+                if(hireBtn) hireBtn.disabled = false;
+                if(researchBtn) researchBtn.disabled = false;
+                if(endTurnBtn) endTurnBtn.disabled = false;
+            } else {
+                ind.className = 'enemy-turn';
+                ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> Сейчас ходит соперник...';
+                if(hireBtn) hireBtn.disabled = true;
+                if(researchBtn) researchBtn.disabled = true;
+                if(endTurnBtn) endTurnBtn.disabled = true;
+            }
+        }
+
+        document.getElementById('new-battle-btn').addEventListener('click', startBattle);
+        document.getElementById('end-turn-btn').addEventListener('click', () => {
+            if (gameState !== 'playing' || turn !== 'player') return;
+
+            logMessage("Вы завершили ход.", 'msg-sys');
+            selectedUnit = null;
+            draw();
+
+            if (GAME_MODE === 'multiplayer') {
+                turn = 'wait';
+                isMyTurnMp = false;
+                updateTurnIndicator();
+                mpSendState(false);
+            } else {
+                turn = 'ai';
+                setTimeout(aiTurn, 500);
+            }
+        });
+
+        function getPlayerMaxUnits() {
+            let max = 3;
+            if (hasTech('cap1')) max += 1;
+            if (hasTech('cap2')) max += 2;
+            if (hasTech('cap3')) max += 3;
+            return max;
+        }
+
+        function getCurrentUnitCap(faction) {
+            return units.filter(u => u.type === faction && u.uClass !== 'hq').length;
+        }
+
+        setInterval(() => {
+            if (gameState === 'playing') {
+                let baseIncome = 3;
+                if (hasTech('eco1')) baseIncome += 1;
+                if (hasTech('eco3')) baseIncome += 2;
+                if (hasTech('eco4')) baseIncome += 3;
+                playerGold += baseIncome;
+                let aiIncome = 3;
+                if (currentRankIdx >= 2) aiIncome += 1;
+                if (currentRankIdx >= 5) aiIncome += 1;
+                if (currentRankIdx >= 10) aiIncome += 2;
+                if (currentRankIdx >= 14) aiIncome += 2;
+                aiGold += aiIncome; 
+                updateUI();
+            }
+        }, 1000);
+
+        loadGame();
+        document.fonts.ready.then(() => { updateUI(); startBattle(); });
+
+        function logMessage(text, colorClass = '') {
+            const mc = document.getElementById('messages-content');
+            const div = document.createElement('div');
+            div.className = `msg ${colorClass}`;
+            div.textContent = text;
+            mc.appendChild(div);
+            const container = document.getElementById('game-messages');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function saveGame(ended = false, won = false) {
+            const data = { 
+                xp: playerXp, 
+                rankIdx: currentRankIdx, 
+                bulbs: lightbulbs, 
+                techs: researchedTechs.join(','),
+                gold: playerGold,
+                ended: ended,
+                won: won,
+                enemies_killed: sessionKillsToSave
+            };
+            sessionKillsToSave = 0;
+            fetch('/api/save/', {
+                method: 'POST',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        function loadGame() {
+            TECH_TREE['eco1'].researched = hasTech('eco1');
+            TECH_TREE['eco2'].researched = hasTech('eco2');
+            TECH_TREE['eco3'].researched = hasTech('eco3');
+            TECH_TREE['eco4'].researched = hasTech('eco4');
+            TECH_TREE['cap1'].researched = hasTech('cap1');
+            TECH_TREE['cap2'].researched = hasTech('cap2');
+            TECH_TREE['cap3'].researched = hasTech('cap3');
+            TECH_TREE['inf_hp1'].researched = hasTech('inf_hp1');
+            TECH_TREE['inf_dmg1'].researched = hasTech('inf_dmg1');
+            TECH_TREE['inf_hp2'].researched = hasTech('inf_hp2');
+            TECH_TREE['inf_rng'].researched = hasTech('inf_rng');
+            TECH_TREE['tnk_dmg1'].researched = hasTech('tnk_dmg1');
+            TECH_TREE['tnk_hp1'].researched = hasTech('tnk_hp1');
+            TECH_TREE['tnk_dmg2'].researched = hasTech('tnk_dmg2');
+            TECH_TREE['tnk_hp2'].researched = hasTech('tnk_hp2');
+            TECH_TREE['art_dmg1'].researched = hasTech('art_dmg1');
+            TECH_TREE['art_rng1'].researched = hasTech('art_rng1');
+            TECH_TREE['art_dmg2'].researched = hasTech('art_dmg2');
+            TECH_TREE['art_mgr'].researched = hasTech('art_mgr');
+            TECH_TREE['air_dmg1'].researched = hasTech('air_dmg1');
+            TECH_TREE['air_hp1'].researched = hasTech('air_hp1');
+            TECH_TREE['air_dmg2'].researched = hasTech('air_dmg2');
+            TECH_TREE['air_rng1'].researched = hasTech('air_rng1');
+        }
+
+        function updateUI() {
+            let nextRankXpText = 'МАКС';
+            let progressPercent = 100;
+            if (currentRankIdx < ranks.length - 1) {
+                let currentRankXp = ranks[currentRankIdx].xp;
+                let nextRankXp = ranks[currentRankIdx + 1].xp;
+                nextRankXpText = nextRankXp;
+                let needed = nextRankXp - currentRankXp;
+                let earned = playerXp - currentRankXp;
+                progressPercent = Math.min(100, Math.max(0, (earned / needed) * 100));
+            }
+            let xpBarFill = document.getElementById('xp-bar-fill');
+            if(xpBarFill) xpBarFill.style.width = progressPercent + '%';
+            document.getElementById('player-rank').textContent = ranks[currentRankIdx].name;
+            let iconEl = document.getElementById('player-rank-icon');
+            // пахю
+            if (iconEl && ranks[currentRankIdx].icon) iconEl.src = '/static/rank_icons/' + ranks[currentRankIdx].icon;
+            document.getElementById('player-xp').textContent = playerXp;
+            document.getElementById('next-rank-xp').textContent = nextRankXpText;
+            document.getElementById('lightbulbs-cnt').textContent = lightbulbs;
+            document.getElementById('gold-cnt').textContent = playerGold;
+            let p_cur = getCurrentUnitCap('player');
+            let p_max = getPlayerMaxUnits();
+            const capEl = document.getElementById('unit-cap-cnt');
+            if(capEl) capEl.textContent = `${p_cur} / ${p_max}`;
+            saveGame();
+        }
+
+        function addXp(amount) {
+            playerXp += amount;
+            let leveledUp = false;
+            while (currentRankIdx < ranks.length - 1 && playerXp >= ranks[currentRankIdx + 1].xp) {
+                currentRankIdx++;
+                leveledUp = true;
+            }
+            // пахуи
+            if (leveledUp) logMessage(`Новое звание: ${ranks[currentRankIdx].name}!`, 'msg-sys');
+            updateUI();
+        }
+
+        function hasTech(id) { return researchedTechs.includes(id); }
+
+        function getUnitStats(type, faction) {
+            let hp = UNIT_TYPES[type].hp;
+            let dmg = [...UNIT_TYPES[type].dmg];
+            let move = UNIT_TYPES[type].move;
+            let range = UNIT_TYPES[type].range;
+            if (faction === 'player') {
+                if (type === 'infantry' && hasTech('inf_hp1')) hp += 5;
+                if (type === 'infantry' && hasTech('inf_hp2')) hp += 10;
+                if (type === 'infantry' && hasTech('inf_dmg1')) { dmg[0]+=3; dmg[1]+=3; }
+                if (type === 'infantry' && hasTech('inf_rng')) range += 1;
+                if (type === 'tank' && hasTech('tnk_dmg1')) { dmg[0]+=3; dmg[1]+=3; }
+                if (type === 'tank' && hasTech('tnk_hp1')) hp += 15;
+                if (type === 'tank' && hasTech('tnk_dmg2')) { dmg[0]+=5; dmg[1]+=5; }
+                if (type === 'tank' && hasTech('tnk_hp2')) hp += 25;
+                if (type === 'artillery' && hasTech('art_dmg1')) { dmg[0]+=5; dmg[1]+=5; }
+                if (type === 'artillery' && hasTech('art_rng1')) range += 1;
+                if (type === 'artillery' && hasTech('art_dmg2')) { dmg[0]+=8; dmg[1]+=8; }
+                if (type === 'artillery' && hasTech('art_mgr')) move += 1;
+                if (type === 'air' && hasTech('air_dmg1')) { dmg[0]+=4; dmg[1]+=4; }
+                // пахууй
+                if (type === 'air' && hasTech('air_hp1')) hp += 10;
+                // похуй
+                if (type === 'air' && hasTech('air_dmg2')) { dmg[0]+=7; dmg[1]+=7; }
+                if (type === 'air' && hasTech('air_rng1')) move += 1;
+            } else if (faction === 'enemy') {
+                if (currentRankIdx >= 10 && type !== 'hq') {
+                    hp = Math.floor(hp * 1.1);
+                    dmg[0] = Math.ceil(dmg[0] * 1.1);
+                    dmg[1] = Math.ceil(dmg[1] * 1.1);
+                }
+            }
+            return { hp: hp, maxHp: hp, dmg: dmg, move: move, range: range };
+        }
+
+        function spawnUnit(faction, uType) {
+            let syStart = faction === 'player' ? 8 : 0;
+            let syEnd = faction === 'player' ? 7 : 1;
+            let step = faction === 'player' ? -1 : 1;
+            let spawnCords = null;
+            let y = syStart;
+            while(true) {
+                // похй
+                for(let x=0; x<GRID_SIZE; x++) {
+                    if (!getUnitAt(x, y)) { spawnCords = {x, y}; break; }
+                }
+                if (spawnCords || y === syEnd) break;
+                y += step;
+            }
+            if (spawnCords) {
+                let stats = getUnitStats(uType, faction);
+                units.push({ type: faction, uClass: uType, x: spawnCords.x, y: spawnCords.y, hp: stats.hp, maxHp: stats.maxHp, damage: stats.dmg, moveRange: stats.move, attackRange: stats.range, hasMoved: faction === 'player' ? (turn !== 'player') : false, hasAttacked: faction === 'player' ? (turn !== 'player') : false });
+                return true;
+            }
+            return false;
+        }
+
+        function startBattle() {
+            units = [];
+            
+            playerGold = 50 + (hasTech('eco2') ? 50 : 0);
+            aiGold = 50; 
+            if (GAME_MODE === 'multiplayer') {
+                if (GAME_ROLE === 'host') {
+                    units.push({ type: 'player', uClass: 'hq', x: 4, y: 8, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                    units.push({ type: 'enemy', uClass: 'hq', x: 4, y: 0, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                    turn = 'player';
+                    isMyTurnMp = true;
+                    gameState = 'playing';
+                    updateTurnIndicator();
+                } else if (GAME_ROLE === 'guest') {
+                    turn = 'wait';
+                    isMyTurnMp = false;
+                    gameState = 'playing';
+                    updateTurnIndicator();
+                    mpStartPolling();
+                }
+            } else {
+                units.push({ type: 'player', uClass: 'hq', x: 4, y: 8, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                units.push({ type: 'enemy', uClass: 'hq', x: 4, y: 0, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                aiGold = 25 + (currentRankIdx * 10);
+                turn = 'player';
+                gameState = 'playing';
+                updateTurnIndicator();
+            }
+
+            selectedUnit = null;
+            document.getElementById('messages-content').innerHTML = '';
+            logMessage("Битва началась!", 'msg-sys');
+            updateUI();
+            draw();
+        }
+
+        function getUnitAt(x, y) { return units.find(u => u.x === x && u.y === y); }
+
+        window.openModal = function(type) {
+            const container = document.getElementById('modal-container');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            const contentContainer = document.querySelector('.modal-content');
+            body.innerHTML = '';
+            
+            if (type === 'hire') {
+                contentContainer.classList.remove('wide');
+                title.innerHTML = '<i class="fa-solid fa-person-military-rifle"></i> Найм Юнитов';
+                let cur = getCurrentUnitCap('player');
+                let max = getPlayerMaxUnits();
+                
+                ['infantry', 'tank', 'artillery', 'air'].forEach(t => {
+                    const data = UNIT_TYPES[t];
+                    const stats = getUnitStats(t, 'player');
+                    const canAfford = playerGold >= data.cost;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'modal-list-item';
+                    div.innerHTML = `
+                        <div class="icon-circle" style="background:#222; color:${data.color};">${data.iconHtml}</div>
+                        <div style="flex-grow:1; margin-left: 10px;"><b>${data.name}</b><br><small style="color:#aaa;">Урон: ${stats.dmg.join('-')} | HP: ${stats.maxHp}</small></div>
+                        <button class="btn-hire" ${!canAfford || cur >= max ? 'disabled' : ''} onclick="buyUnit('${t}')">Нанять <span style="font-size:0.85em; color:#ffeb3b;"><i class="fa-solid fa-coins"></i> ${data.cost}</span></button>
+                    `;
+                    body.appendChild(div);
+                });
+            } else if (type === 'tech' || type === 'research') {
+                contentContainer.classList.add('wide');
+                title.innerHTML = '<i class="fa-solid fa-microchip"></i> Инженерия (Древо Технологий)';
+                const COLS = [
+                    { id: 'gold', title: '<i class="fa-solid fa-coins"></i> Экономика', nodes: ['eco1', 'eco2', 'eco3', 'eco4'] },
+                    { id: 'command', title: '<i class="fa-solid fa-building-circle-arrow-right"></i> Структура', nodes: ['cap1', 'cap2', 'cap3'] },
+                    { id: 'infantry', title: '<i class="fa-solid fa-person-rifle"></i> Пехота', nodes: ['inf_hp1', 'inf_dmg1', 'inf_hp2', 'inf_rng'] },
+                    { id: 'tanks', title: '<div style="display:inline-block; width:22px; vertical-align:middle; position:relative; top:-2px; color:inherit;">' + UNIT_TYPES['tank'].iconHtml + '</div> Танки', nodes: ['tnk_dmg1', 'tnk_hp1', 'tnk_dmg2', 'tnk_hp2'] },
+                    { id: 'artillery', title: '<i class="fa-solid fa-crosshairs"></i> Артиллерия', nodes: ['art_dmg1', 'art_rng1', 'art_dmg2', 'art_mgr'] },
+                    { id: 'air', title: '<i class="fa-solid fa-plane-up"></i> Авиация', nodes: ['air_dmg1', 'air_hp1', 'air_dmg2', 'air_rng1'] }
+                ];
+                
+                let html = '<div class="tech-tree-container">';
+                COLS.forEach(col => {
+                    html += `<div class="tech-column"><div class="tech-col-title">${col.title}</div>`;
+                    col.nodes.forEach(nodeId => {
+                        const tech = TECH_TREE[nodeId];
+                        let stateClass = 'locked';
+                        if (tech.researched) stateClass = 'researched';
+                        else if (tech.req.length === 0 || tech.req.every(r => TECH_TREE[r].researched)) stateClass = 'ready';
+                        
+                        html += `
+                            <div class="tech-node ${stateClass}" onclick="buyTech('${nodeId}')">
+                                <div style="font-weight:bold; font-size:1.05rem; margin-bottom:5px;">${tech.name}</div>
+                                <div style="font-size:0.75rem; color:#aaa; margin-bottom:8px;">${tech.desc}</div>
+                                <div style="color:#ffeb3b; font-weight:bold; font-size:0.9rem;"><i class="fa-solid fa-flask"></i> ${tech.cost}</div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                html += '</div>';
+                body.innerHTML = html;
+            }
+            container.style.display = 'flex';
+        }
+
+        window.closeModal = function() {
+            document.getElementById('modal-container').style.display = 'none';
+        }
+
+        window.buyUnit = function(t) {
+            if (turn !== 'player' || gameState !== 'playing') {
+                logMessage("Вы не можете нанимать войска во время чужого хода!", "msg-dmg");
+                return;
+            }
+            let cost = UNIT_TYPES[t].cost;
+            if (playerGold >= cost && getCurrentUnitCap('player') < getPlayerMaxUnits()) {
+                if (spawnUnit('player', t)) {
+                    playerGold -= cost;
+                    updateUI();
+                    draw();
+                    openModal('hire');
+                }
+            }
+        }
+
+        window.buyTech = function(id) {
+            if (turn !== 'player' || gameState !== 'playing') {
+                logMessage("Инженерия доступна только в ваш ход!", "msg-dmg");
+                return;
+            }
+            let tech = TECH_TREE[id];
+            if (!tech.researched && lightbulbs >= tech.cost && (tech.req.length === 0 || tech.req.every(r => TECH_TREE[r].researched))) {
+                lightbulbs -= tech.cost;
+                tech.researched = true;
+                researchedTechs.push(id);
+                updateUI();
+                openModal('tech');
+            }
+        }
+
+        canvas.addEventListener('click', (e) => {
+            if (gameState !== 'playing' || turn !== 'player') return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = Math.floor(((e.clientX - rect.left) * scaleX) / CELL_SIZE);
+            const y = Math.floor(((e.clientY - rect.top) * scaleY) / CELL_SIZE);
+            const clickedUnit = getUnitAt(x, y);
+            
+            if (clickedUnit && clickedUnit.type === 'player') {
+                selectedUnit = clickedUnit;
+                draw();
+                return;
+            }
+            
+            if (selectedUnit && !clickedUnit) {
+                let dist = Math.max(Math.abs(x - selectedUnit.x), Math.abs(y - selectedUnit.y));
+                if (dist <= selectedUnit.moveRange && !selectedUnit.hasMoved && !selectedUnit.hasAttacked) {
+                    selectedUnit.x = x; selectedUnit.y = y; selectedUnit.hasMoved = true;
+                    draw();
+                }
+            } else if (selectedUnit && clickedUnit && clickedUnit.type === 'enemy') {
+                let dist = Math.max(Math.abs(x - selectedUnit.x), Math.abs(y - selectedUnit.y));
+                if (dist <= selectedUnit.attackRange && !selectedUnit.hasAttacked) {
+                    let dmg = Math.floor(Math.random()*(selectedUnit.damage[1]-selectedUnit.damage[0]+1)) + selectedUnit.damage[0];
+                    clickedUnit.hp -= dmg;
+                    selectedUnit.hasAttacked = true;
+                    selectedUnit.hasMoved = true; // Запрещаем движение после атаки
+                    checkDeaths();
+                    draw();
+                }
+            }
+        });
+
+        function checkDeaths() {
+            let died = false;
+            // пахую
+            for (let i = units.length - 1; i >= 0; i--) {
+                if (units[i].hp <= 0) {
+                    let u = units[i];
+                    if (u.type === 'enemy') {
+                        sessionKillsToSave++;
+                        logMessage(`Вражеский ${UNIT_TYPES[u.uClass].name} уничтожен!`, 'msg-dmg');
+                        if (u.uClass !== 'hq') {
+                            let bulbs = Math.floor(Math.random() * 3) + 1;
+                            lightbulbs += bulbs;
+                            logMessage(`Собрано ${bulbs} 💡`, 'msg-sys');
+                            if (u.uClass === 'tank' || u.uClass === 'air') addXp(10);
+                            else addXp(5);
+                        }
+                    } else {
+                        logMessage(`Ваш ${UNIT_TYPES[u.uClass].name} пал в бою!`, 'msg-dmg');
+                    }
+                    if (u === selectedUnit) selectedUnit = null;
+                    units.splice(i, 1);
+                    died = true;
+                }
+            }
+            let p_hq = units.filter(u => u.type === 'player' && u.uClass === 'hq');
+            let e_hq = units.filter(u => u.type === 'enemy' && u.uClass === 'hq');
+            if (p_hq.length === 0) {
+                gameState = 'lost'; 
+                logMessage("Поражение! Ваш Штаб пал.", 'msg-dmg'); 
+                saveGame(true, false); 
+                draw(); 
+                if (GAME_MODE === 'multiplayer') mpSendState(true);
+                setTimeout(() => alert("Поражение"), 100); 
+                return true;
+            }
+            if (e_hq.length === 0) {
+                gameState = 'won'; 
+                logMessage("Победа! Вражеский Штаб уничтожен.", 'msg-heal'); 
+                addXp(100); 
+                saveGame(true, true); 
+                draw(); 
+                if (GAME_MODE === 'multiplayer') mpSendState(true);
+                setTimeout(() => alert("Победа!"), 100);
+                return true;
+            }
+            updateUI();
+            return died;
+        }
+
+        function aiTurn() {
+            if (gameState !== 'playing') return;
+            
+            let attempts = 0;
+            let currentAiCap = getCurrentUnitCap('enemy');
+            let aiMaxCap = getPlayerMaxUnits(); // Строго честный лимит - ни на один отряд больше! 
+            while(attempts < 15 && currentAiCap < aiMaxCap) {
+                let bought = false;
+                let options = ['infantry', 'tank', 'artillery', 'air'].sort(() => Math.random() - 0.5);
+                for(let opt of options) {
+                    if (aiGold >= UNIT_TYPES[opt].cost) {
+                        if (spawnUnit('enemy', opt)) {
+                            aiGold -= UNIT_TYPES[opt].cost;
+                            currentAiCap++;
+                            bought = true;
+                            break; 
+                        }
+                    }
+                }
+                // пхй
+                if (!bought) break; 
+                attempts++;
+            }
+
+            let enemies = units.filter(u => u.type === 'enemy');
+            let players = units.filter(u => u.type === 'player'); 
+            
+            enemies.forEach(enemy => {
+                if (enemy.hp <= 0 || enemy.uClass === 'hq') return;
+                let closest = null; let minDist = Infinity;
+                players.forEach(p => {
+                    if (p.hp <= 0) return;
+                    let dist = Math.max(Math.abs(p.x - enemy.x), Math.abs(p.y - enemy.y));
+                    if (dist < minDist) { minDist = dist; closest = p; }
+                });
+                if (!closest) return;
+                
+                if (minDist <= enemy.attackRange) {
+                    let dmg = Math.floor(Math.random()*(enemy.damage[1]-enemy.damage[0]+1)) + enemy.damage[0];
+                    closest.hp -= dmg;
+                    logMessage(`Вражеский ${UNIT_TYPES[enemy.uClass].name} нанес вам ${dmg} ед. урона!`, 'msg-dmg');
+                } else {
+                    let bestX = enemy.x; let bestY = enemy.y; let bestDist = minDist;
+                    let mr = enemy.moveRange;
+                    for(let dy=-mr; dy<=mr; dy++) {
+                        for(let dx=-mr; dx<=mr; dx++) {
+                            // пхуй
+                            if (dx===0 && dy===0) continue;
+                            let nx = enemy.x + dx; let ny = enemy.y + dy;
+                            if (nx>=0 && nx<GRID_SIZE && ny>=0 && ny<GRID_SIZE) {
+                                let moveDist = Math.max(Math.abs(dx), Math.abs(dy));
+                                if (!getUnitAt(nx, ny) && moveDist <= mr) {
+                                    let distToPl = Math.max(Math.abs(closest.x - nx), Math.abs(closest.y - ny));
+                                    if (distToPl < bestDist) { bestDist = distToPl; bestX = nx; bestY = ny; }
+                                }
+                            }
+                        }
+                    }
+                    if (bestX !== enemy.x || bestY !== enemy.y) { enemy.x = bestX; enemy.y = bestY; }
+                    let newDist = Math.max(Math.abs(closest.x - enemy.x), Math.abs(closest.y - enemy.y));
+                    if (newDist <= enemy.attackRange) {
+                        let dmg = Math.floor(Math.random()*(enemy.damage[1]-enemy.damage[0]+1)) + enemy.damage[0];
+                        closest.hp -= dmg;
+                        logMessage(`Вражеский ${UNIT_TYPES[enemy.uClass].name} подошел и атаковал! (-${dmg} HP)`, 'msg-dmg');
+                    }
+                }
+            });
+            
+            checkDeaths();
+            if (gameState === 'playing') {
+                turn = 'player';
+                units.forEach(u => { u.hasMoved = false; u.hasAttacked = false; });
+                logMessage("Ваш ход! Можете управлять всеми войсками.", 'msg-sys');
+                selectedUnit = null;
+                draw();
+            }
+        }
+
+        function mpSendState(finished = false) {
+            if (GAME_MODE !== 'multiplayer' || !ROOM_ID) return;
+            
+            let exportUnits = units.map(u => {
+                let sendingX = GRID_SIZE - 1 - u.x;
+                let sendingY = GRID_SIZE - 1 - u.y;
+                let sendingType = (u.type === 'player') ? 'enemy' : 'player';
+                return { ...u, x: sendingX, y: sendingY, type: sendingType };
+            });
+
+            let sendingData = {
+                units: exportUnits,
+                aiGold_for_opponent: playerGold,
+                playerGold_for_opponent: aiGold,
+            };
+
+            fetch(`/api/mp/sync/${ROOM_ID}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished })
+            });
+
+            if(!finished) mpStartPolling();
+        }
+
+        function mpStartPolling() {
+            if (GAME_MODE !== 'multiplayer') return;
+            if (mpSyncInterval) clearInterval(mpSyncInterval);
+            mpSyncInterval = setInterval(() => {
+                fetch(`/api/mp/sync/${ROOM_ID}/`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.room_status === 'waiting' && GAME_ROLE === 'host') {
+                            let ind = document.getElementById('turn-indicator');
+                            ind.className = 'enemy-turn';
+                            ind.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Ожидание подключения второго Командира...';
+                            return;
+                        } else if (data.current_turn !== GAME_ROLE) {
+                            let ind = document.getElementById('turn-indicator');
+                            ind.className = 'enemy-turn';
+                            ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> Сейчас ходит соперник...';
+                        }
+                        
+                        if (data.room_status === 'finished') {
+                            clearInterval(mpSyncInterval);
+                            
+                            if (data.game_data && data.game_data !== '{}') {
+                                let incomingData = JSON.parse(data.game_data);
+                                units = incomingData.units || [];
+                            }
+                            draw();
+                            
+                            if (!checkDeaths()) {
+                                gameState = 'finished'; // preventing further plays
+                                alert("Матч завершен!");
+                            }
+                            return;
+                        }
+
+                        if (data.current_turn === GAME_ROLE) {
+                            clearInterval(mpSyncInterval);
+                            isMyTurnMp = true;
+                            turn = 'player';
+                            updateTurnIndicator();
+                            
+                           if (data.game_data && data.game_data !== '{}') {
+                                let incomingData = JSON.parse(data.game_data);
+                                units = incomingData.units || [];
+                            }
+                            
+                            units.forEach(u => { if (u.type === 'player') { u.hasMoved=false; u.hasAttacked=false; }});
+                            
+                            updateUI();
+                            logMessage("Ваш ход!", 'msg-sys');
+                            draw();
+                            checkDeaths();
+                        }
+                    }
+                });
+            }, 2000);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(let y=0; y<GRID_SIZE; y++) {
+                for(let x=0; x<GRID_SIZE; x++) {
+                    ctx.fillStyle = (x+y)%2===0 ? COLORS.grid1 : COLORS.grid2;
+                    ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+            
+            // похуйй
+            if (selectedUnit) {
+                ctx.fillStyle = COLORS.highlightSelect;
+                ctx.fillRect(selectedUnit.x*CELL_SIZE, selectedUnit.y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                let mr = selectedUnit.moveRange;
+                let ar = selectedUnit.attackRange;
+                let maxR = Math.max(mr, ar);
+                for(let dy=-maxR; dy<=maxR; dy++) {
+                    for(let dx=-maxR; dx<=maxR; dx++) {
+                        if (dx===0 && dy===0) continue;
+                        let nx = selectedUnit.x + dx;
+                        let ny = selectedUnit.y + dy;
+                        if (nx>=0 && nx<GRID_SIZE && ny>=0 && ny<GRID_SIZE) {
+                            let target = getUnitAt(nx, ny);
+                            let dist = Math.max(Math.abs(dx), Math.abs(dy));
+                            // похуи
+                            if (!target && !selectedUnit.hasMoved && !selectedUnit.hasAttacked && dist <= mr) {
+                                ctx.fillStyle = COLORS.highlightMove;
+                                ctx.fillRect(nx*CELL_SIZE, ny*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                            } else if (target && target.type === 'enemy' && !selectedUnit.hasAttacked && dist <= ar) {
+                                ctx.fillStyle = COLORS.highlightAttack;
+                                ctx.fillRect(nx*CELL_SIZE, ny*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            units.forEach(u => {
+                let px = u.x * CELL_SIZE;
+                let py = u.y * CELL_SIZE;
+                let typeData = UNIT_TYPES[u.uClass];
+                
+                let ownerColor = u.type === 'player' ? '#00FF00' : '#F44336';
+                // поохуй
+                if (u.uClass === 'hq') ownerColor = u.type === 'player' ? '#1976D2' : '#C62828';
+                
+                ctx.save();
+                ctx.translate(px + 6, py + 6); // Отступ
+                ctx.scale((CELL_SIZE-12)/24, (CELL_SIZE-12)/24); 
+                let p2d = new Path2D(typeData.path);
+                
+                ctx.fillStyle = ownerColor;
+                ctx.fill(p2d);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.stroke(p2d);
+                ctx.restore();
+                
+                if (u.type === 'player' && u.hasAttacked && gameState === 'playing' && turn === 'player' && u.uClass !== 'hq') {
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                } else if (u.type === 'player' && u.hasMoved && gameState === 'playing' && turn === 'player' && u.uClass !== 'hq') {
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                }
+
+                let hpRatio = u.hp / u.maxHp;
+                ctx.fillStyle = '#111';
+                ctx.fillRect(px + 4, py + CELL_SIZE - 8, CELL_SIZE - 8, 4);
+                ctx.fillStyle = hpRatio > 0.5 ? '#4CAF50' : hpRatio > 0.25 ? '#FFEB3B' : '#F44336';
+                ctx.fillRect(px + 4, py + CELL_SIZE - 8, (CELL_SIZE - 8) * hpRatio, 4);
+            });
+
+            if (gameState === 'won') {
+                drawTextOverlay("ПОБЕДА", "#00FF00");
+            } else if (gameState === 'lost') {
+                drawTextOverlay("ПОРАЖЕНИЕ", "#f44336");
+            }
+        }
+
+        function drawTextOverlay(text, color) {
+            ctx.fillStyle = 'rgba(0,0,0,0.65)';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = color;
+            ctx.font = 'bold 44px Tahoma';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = "rgba(0,0,0,0.8)";
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.shadowBlur = 4;
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+            ctx.shadowColor = "transparent";
+        }
+    </script>
+</body>
+</html>
