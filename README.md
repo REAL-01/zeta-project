@@ -1,4 +1,4 @@
-# LOL ETA TIPA ZETA PROJECT
+# LOL ETA TIPA ZETA PROJECT v0.0.25
 
 **Жанр:** Пошаговая браузерная стратегия (Turn-based / RTS Economy).
 
