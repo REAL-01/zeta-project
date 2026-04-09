@@ -135,7 +135,7 @@
         </div>
         <div class="header-actions">
             <a href="{% url 'profile' %}" class="btn btn-gray"><i class="fa-solid fa-user"></i> Профиль</a>
-            <a href="{% url 'logout' %}" class="btn btn-gray"><i class="fa-solid fa-right-from-bracket"></i> Выход</a>
+            <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-gray"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
         </div>
     </div>
 

@@ -7,18 +7,15 @@ class BannedIPMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        ip = self.get_client_ip(request)
+        ip = request.META.get('REMOTE_ADDR')
         if ip:
-            if BannedIP.objects.filter(ip_address=ip).exists():
+            banned = cache.get('banned_ips')
+            if banned is None:
+                banned = set(BannedIP.objects.values_list('ip_address', flat=True))
+                cache.set('banned_ips', banned, 60)
+            
+            if ip in banned:
                 return HttpResponseForbidden("Ваш IP-адрес заблокирован Администратором сервера.")
 
         response = self.get_response(request)
         return response
-
-    def get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = request.META.get('REMOTE_ADDR')
-        return ip

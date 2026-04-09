@@ -432,8 +432,8 @@
     <div id="app">
         <div id="left-panel">
             <div class="mobile-order-1" style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Zeta Project <span style="font-size:0.6rem; color:#aaa;">v0.0.2</span></h2>
-                <a href="{% url 'logout' %}" style="color:#f44336; text-decoration:none; font-size:0.9rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-right-from-bracket"></i> Выход</a>
+                <h2>Zeta Project <span style="font-size:0.6rem; color:#aaa;">v0.0.25</span></h2>
+                <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:#f44336; text-decoration:none; font-size:0.9rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
             </div>
             
             <div class="profile-card mobile-order-6">
@@ -979,6 +979,21 @@
                 researchedTechs.push(id);
                 updateUI();
                 openModal('tech');
+                
+                units.forEach(u => {
+                    if (u.type === 'player' && u.uClass !== 'hq') {
+                        let newStats = getUnitStats(u.uClass, 'player');
+                        if (u.maxHp < newStats.maxHp) {
+                            let diff = newStats.maxHp - u.maxHp;
+                            u.maxHp = newStats.maxHp;
+                            u.hp += diff;
+                        }
+                        u.damage = newStats.dmg;
+                        u.moveRange = newStats.move;
+                        u.attackRange = newStats.range;
+                    }
+                });
+                draw();
             }
         }
 
@@ -1162,6 +1177,7 @@
 
             fetch(`/api/mp/sync/${ROOM_ID}/`, {
                 method: 'POST',
+                keepalive: true,
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                 body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished })
             });
@@ -1194,6 +1210,8 @@
                             if (data.game_data && data.game_data !== '{}') {
                                 let incomingData = JSON.parse(data.game_data);
                                 units = incomingData.units || [];
+                                if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
+                                if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
                             }
                             draw();
                             
@@ -1213,6 +1231,8 @@
                            if (data.game_data && data.game_data !== '{}') {
                                 let incomingData = JSON.parse(data.game_data);
                                 units = incomingData.units || [];
+                                if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
+                                if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
                             }
                             
                             units.forEach(u => { if (u.type === 'player') { u.hasMoved=false; u.hasAttacked=false; }});
