@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0a0a0c;
-            --surface: rgba(20, 20, 25, 0.7);
+            --bg: #0a0b0a;
+            --surface: rgba(19, 20, 24, 0.75);
             --border: rgba(255, 255, 255, 0.1);
-            --primary: #e91e63;
-            --text: #e0e0e0;
+            --primary: #00B4D8;
+            --text: #e4e2e0;
         }
 
         body {
@@ -23,7 +23,7 @@
             font-family: 'Space Grotesk', sans-serif;
             min-height: 100vh;
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(233, 30, 99, 0.15) 0%, transparent 50%);
+                radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.1) 0%, transparent 50%);
         }
 
         .header {
@@ -48,15 +48,17 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(233, 30, 99, 0.1);
-            color: var(--primary);
-            border: 1px solid rgba(233, 30, 99, 0.3);
+            background: rgba(0, 180, 216, 0.1);
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            border: 1px solid rgba(0, 180, 216, 0.3);
         }
 
         .btn:hover {
             background: var(--primary);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(233, 30, 99, 0.4);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
+            border-color: var(--primary);
         }
 
         table {
@@ -66,7 +68,8 @@
             backdrop-filter: blur(20px);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
         }
 
         th, td {
