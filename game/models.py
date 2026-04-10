@@ -9,7 +9,7 @@ class Player(AbstractUser):
     )
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
-    playerGold = models.IntegerField(default=50, verbose_name="Золото")
+    playerGold = models.IntegerField(default=50, verbose_name="Ресурсы (Мета)")
     playerXp = models.IntegerField(default=0, verbose_name="Опыт")
     currentRankIdx = models.IntegerField(default=0, verbose_name="Ранг")
     lightbulbs = models.IntegerField(default=0, verbose_name="Лампочки")

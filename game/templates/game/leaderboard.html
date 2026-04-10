@@ -171,7 +171,6 @@
                     <th>Командир</th>
                     <th style="text-align: center;">Победы</th>
                     <th style="text-align: center;">Винрейт</th>
-                    <th style="text-align: right;">Состояние</th>
                 </tr>
             </thead>
             <tbody>
@@ -203,13 +202,10 @@
                     <td style="text-align: center; color: #4CAF50;">
                         {{ p.win_rate }}%
                     </td>
-                    <td style="text-align: right; color: var(--gold);">
-                        <i class="fa-solid fa-coins"></i> {{ p.gold }}
-                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align:center; padding: 40px; color:var(--text-muted);">
+                    <td colspan="4" style="text-align:center; padding: 40px; color:var(--text-muted);">
                         <i class="fa-solid fa-satellite" style="font-size: 3rem; margin-bottom:15px; opacity: 0.5;"></i><br>
                         База данных пуста. Запишите свое имя в историю первым!
                     </td>

@@ -489,9 +489,9 @@
                     <div class="stat-label">Наука</div>
                     <div class="stat-value" id="lightbulbs-cnt">0</div>
                 </div>
-                <div class="stat-item" style="color: #ffd700">
-                    <i class="fa-solid fa-coins"></i>
-                    <div class="stat-label">Казна</div>
+                <div class="stat-item" style="color: #64ffda">
+                    <i class="fa-solid fa-cubes"></i>
+                    <div class="stat-label">Ресурсы</div>
                     <div class="stat-value" id="gold-cnt">0</div>
                 </div>
             </div>
@@ -594,10 +594,10 @@
         };
 
         const TECH_TREE = {
-            'eco1': { id: 'eco1', name: 'Шахты', desc: '+1 Золото/сек', cost: 10, req: [], researched: false },
-            'eco2': { id: 'eco2', name: 'Логистика', desc: 'Старт. Золото +50', cost: 25, req: ['eco1'], researched: false },
-            'eco3': { id: 'eco3', name: 'Банки', desc: '+2 Золота/сек', cost: 45, req: ['eco2'], researched: false },
-            'eco4': { id: 'eco4', name: 'Госзаказ', desc: '+3 Золота/сек', cost: 70, req: ['eco3'], researched: false },
+            'eco1': { id: 'eco1', name: 'Склады', desc: '+1 Ресурса/сек', cost: 10, req: [], researched: false },
+            'eco2': { id: 'eco2', name: 'Конвои', desc: 'Старт. Ресурсы +50', cost: 25, req: ['eco1'], researched: false },
+            'eco3': { id: 'eco3', name: 'Заводы', desc: '+2 Ресурса/сек', cost: 45, req: ['eco2'], researched: false },
+            'eco4': { id: 'eco4', name: 'ВПК', desc: '+3 Ресурса/сек', cost: 70, req: ['eco3'], researched: false },
             
             'cap1': { id: 'cap1', name: 'Коммутатор', desc: 'Улучшение 1: +1 Лимит', cost: 20, req: [], researched: false },
             'cap2': { id: 'cap2', name: 'Радиовышка', desc: 'Улучшение 2: +2 Лимит', cost: 50, req: ['cap1'], researched: false },
@@ -636,6 +636,12 @@
         let currentRankIdx = _ZETA.r;
         let lightbulbs = _ZETA.l;
         let playerGold = _ZETA.g;
+        let researchedTechs = '{{ techs }}' ? '{{ techs }}'.split(',') : [];
+        let units = [];
+        let sessionKillsToSave = 0;
+        let turn = 'player'; // in multiplayer this will be 'host' or 'guest'
+        let selectedUnit = null;
+        let gameState = 'playing';
         let aiGold = 0;
 
         const GAME_MODE = '{{ mode|default:"single" }}';
@@ -792,14 +798,14 @@
             }
             let xpBarFill = document.getElementById('xp-bar-fill');
             if(xpBarFill) xpBarFill.style.width = progressPercent + '%';
-            document.getElementById('player-rank').textContent = ranks[currentRankIdx].name;
+            if(document.getElementById('player-rank')) document.getElementById('player-rank').textContent = ranks[currentRankIdx].name;
             let iconEl = document.getElementById('player-rank-icon');
             // пахю
             if (iconEl && ranks[currentRankIdx].icon) iconEl.src = '/static/rank_icons/' + ranks[currentRankIdx].icon;
-            document.getElementById('player-xp').textContent = playerXp;
-            document.getElementById('next-rank-xp').textContent = nextRankXpText;
-            document.getElementById('lightbulbs-cnt').textContent = lightbulbs;
-            document.getElementById('gold-cnt').textContent = playerGold;
+            if(document.getElementById('player-xp')) document.getElementById('player-xp').textContent = playerXp;
+            if(document.getElementById('next-rank-xp')) document.getElementById('next-rank-xp').textContent = nextRankXpText;
+            if(document.getElementById('lightbulbs-cnt')) document.getElementById('lightbulbs-cnt').textContent = lightbulbs;
+            if(document.getElementById('gold-cnt')) document.getElementById('gold-cnt').textContent = playerGold;
             let p_cur = getCurrentUnitCap('player');
             let p_max = getPlayerMaxUnits();
             const capEl = document.getElementById('unit-cap-cnt');
@@ -943,7 +949,7 @@
                     div.innerHTML = `
                         <div class="icon-circle" style="background:#222; color:${data.color};">${data.iconHtml}</div>
                         <div style="flex-grow:1; margin-left: 10px;"><b>${data.name}</b><br><small style="color:#aaa;">Урон: ${stats.dmg.join('-')} | HP: ${stats.maxHp}</small></div>
-                        <button class="btn-hire" ${!canAfford || cur >= max ? 'disabled' : ''} onclick="buyUnit('${t}')">Нанять <span style="font-size:0.85em; color:#ffeb3b;"><i class="fa-solid fa-coins"></i> ${data.cost}</span></button>
+                        <button class="btn-hire" ${!canAfford || cur >= max ? 'disabled' : ''} onclick="buyUnit('${t}')">Нанять <span style="font-size:0.85em; color:var(--primary);"><i class="fa-solid fa-cubes"></i> ${data.cost}</span></button>
                     `;
                     body.appendChild(div);
                 });
@@ -951,7 +957,7 @@
                 contentContainer.classList.add('wide');
                 title.innerHTML = '<i class="fa-solid fa-microchip"></i> Инженерия (Древо Технологий)';
                 const COLS = [
-                    { id: 'gold', title: '<i class="fa-solid fa-coins"></i> Экономика', nodes: ['eco1', 'eco2', 'eco3', 'eco4'] },
+                    { id: 'gold', title: '<i class="fa-solid fa-cubes"></i> Снабжение', nodes: ['eco1', 'eco2', 'eco3', 'eco4'] },
                     { id: 'command', title: '<i class="fa-solid fa-building-circle-arrow-right"></i> Структура', nodes: ['cap1', 'cap2', 'cap3'] },
                     { id: 'infantry', title: '<i class="fa-solid fa-person-rifle"></i> Пехота', nodes: ['inf_hp1', 'inf_dmg1', 'inf_hp2', 'inf_rng'] },
                     { id: 'tanks', title: '<div style="display:inline-block; width:22px; vertical-align:middle; position:relative; top:-2px; color:inherit;">' + UNIT_TYPES['tank'].iconHtml + '</div> Танки', nodes: ['tnk_dmg1', 'tnk_hp1', 'tnk_dmg2', 'tnk_hp2'] },

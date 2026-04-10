@@ -171,7 +171,6 @@ def leaderboard_view(request):
             'rank_icon': rank_icon,
             'wins': p.wins,
             'win_rate': win_rate,
-            'gold': p.playerGold,
             'is_current_user': p == request.user
         })
 
@@ -201,7 +200,6 @@ def api_save_game(request):
                 killed = data.get('enemies_killed', 0)
                 if 0 <= killed <= 50:
                     request.user.enemies_destroyed += killed
-                    request.user.playerGold += killed * 20 # 20 meta-gold per kill
                 
                 ended = data.get('ended', False)
                 won = data.get('won', False)
@@ -210,10 +208,8 @@ def api_save_game(request):
                     request.user.games_played += 1
                     if won:
                         request.user.wins += 1
-                        request.user.playerGold += 150 # Победный бонус
                     else:
                         request.user.losses += 1
-                        request.user.playerGold += 35  # Утешительный бонус
                 
                 request.user.save()
             else:
