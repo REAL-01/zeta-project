@@ -227,7 +227,7 @@
                 </div>
             </div>
             <div class="actions">
-                <button onclick="window.history.back();" class="btn btn-play" style="background: rgba(255, 235, 59, 0.1); color: #ffeb3b; border-color: rgba(255, 235, 59, 0.3);"><i class="fa-solid fa-arrow-left"></i> Назад</button>
+                <a href="javascript:void(0);" onclick="goBackOrLobby();" class="btn" style="background: rgba(255, 235, 59, 0.1); color: #ffeb3b; border: 1px solid rgba(255, 235, 59, 0.3);"><i class="fa-solid fa-arrow-left"></i> Назад</a>
                 <a href="{% url 'index' %}" class="btn btn-play"><i class="fa-solid fa-gamepad"></i> В бой</a>
                 <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Выйти</button></form>
             </div>
@@ -281,6 +281,15 @@
         </div>
     </div>
 
+    <script>
+        function goBackOrLobby() {
+            if (document.referrer.includes('/play/')) {
+                window.history.back();
+            } else {
+                window.location.href = "{% url 'lobby' %}";
+            }
+        }
+    </script>
     {% include 'game/audio.html' %}
 </body>
 </html>

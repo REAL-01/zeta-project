@@ -217,8 +217,18 @@
         </table>
     </div>
 
-    <a href="{% url 'lobby' %}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Вернуться в Лобби</a>
+    <a href="javascript:void(0);" onclick="goBackOrLobby();" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Назад</a>
 
+    <script>
+        function goBackOrLobby() {
+            // Если пришли из боя (симулятора), идем назад по истории, чтобы не сбросить сессию
+            if (document.referrer.includes('/play/')) {
+                window.history.back();
+            } else {
+                window.location.href = "{% url 'lobby' %}";
+            }
+        }
+    </script>
     {% include 'game/audio.html' %}
 </body>
 </html>
