@@ -3,13 +3,17 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let audioEnabled = false;
 
-    // Must resume AudioContext after first user interaction (browser policy)
-    document.addEventListener('click', () => {
+    // Включаем звук по ЛЮБОМУ активному действию, включая mousedown (который реагирует быстрее click)
+    const initAudio = () => {
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
         audioEnabled = true;
-    }, { once: true });
+    };
+
+    ['mousedown', 'touchstart', 'keydown', 'click'].forEach(evt => {
+        document.addEventListener(evt, initAudio, { once: true });
+    });
 
     function playTone(freq, type, duration, vol=0.1) {
         if (!audioEnabled || audioCtx.state !== 'running') return;
