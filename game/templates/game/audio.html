@@ -52,6 +52,20 @@
         setTimeout(() => playTone(450, 'triangle', 0.8, 0.15), 150);
     }
 
+    function playSpawnSound() {
+        playTone(400, 'sine', 0.2, 0.05);
+        setTimeout(() => playTone(600, 'sine', 0.3, 0.05), 100);
+    }
+
+    function playDeathSound() {
+        playTone(100, 'sawtooth', 0.4, 0.08);
+        playTone(50, 'sawtooth', 0.6, 0.1);
+    }
+
+    function playAttackSound() {
+        playTone(800, 'square', 0.05, 0.03);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const attachAudioToButtons = () => {
             const buttons = document.querySelectorAll('button, .btn, .btn-link');
@@ -71,5 +85,8 @@
         window.attachAudioToButtons = attachAudioToButtons;
         window.playErrorSound = playError;
         window.playStartSound = playStart;
+        window.playSpawnSound = playSpawnSound;
+        window.playDeathSound = playDeathSound;
+        window.playAttackSound = playAttackSound;
     });
 </script>

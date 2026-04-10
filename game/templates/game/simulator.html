@@ -498,6 +498,7 @@
                 <button id="end-turn-btn" style="background-color: var(--secondary); margin-top: 10px;"><i class="fa-solid fa-hourglass-end"></i> Завершить ход</button>
                 <button id="new-battle-btn" style="background-color: #555; margin-top: 10px;"><i class="fa-solid fa-rotate-right"></i> Новая битва</button>
                 
+                <a href="{% url 'leaderboard' %}" class="btn-link" style="background-color: #FF9800; margin-top: 10px;"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
                 <a href="{% url 'profile' %}" class="btn-link" style="background-color: #009688; margin-top: 10px;"><i class="fa-solid fa-user"></i> Профиль</a>
                 {% if request.user.role == 'admin' %}
                 <a href="{% url 'custom_admin' %}" class="btn-link" style="background-color: #e91e63; margin-top: 10px;"><i class="fa-solid fa-user-shield"></i> Админ-Панель</a>
@@ -860,6 +861,7 @@
                 y += step;
             }
             if (spawnCords) {
+                if(window.playSpawnSound) window.playSpawnSound();
                 let stats = getUnitStats(uType, faction);
                 units.push({ type: faction, uClass: uType, x: spawnCords.x, y: spawnCords.y, hp: stats.hp, maxHp: stats.maxHp, damage: stats.dmg, moveRange: stats.move, attackRange: stats.range, hasMoved: faction === 'player' ? (turn !== 'player') : false, hasAttacked: faction === 'player' ? (turn !== 'player') : false });
                 return true;
@@ -1051,6 +1053,7 @@
             } else if (selectedUnit && clickedUnit && clickedUnit.type === 'enemy') {
                 let dist = Math.max(Math.abs(x - selectedUnit.x), Math.abs(y - selectedUnit.y));
                 if (dist <= selectedUnit.attackRange && !selectedUnit.hasAttacked) {
+                    if(window.playAttackSound) window.playAttackSound();
                     let dmg = Math.floor(Math.random()*(selectedUnit.damage[1]-selectedUnit.damage[0]+1)) + selectedUnit.damage[0];
                     clickedUnit.hp -= dmg;
                     selectedUnit.hasAttacked = true;
@@ -1081,6 +1084,7 @@
                         logMessage(`Ваш ${UNIT_TYPES[u.uClass].name} пал в бою!`, 'msg-dmg');
                     }
                     if (u === selectedUnit) selectedUnit = null;
+                    if(window.playDeathSound) window.playDeathSound();
                     units.splice(i, 1);
                     died = true;
                 }
