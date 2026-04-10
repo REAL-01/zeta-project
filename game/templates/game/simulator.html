@@ -498,6 +498,7 @@
                 <button id="end-turn-btn" style="background-color: var(--secondary); margin-top: 10px;"><i class="fa-solid fa-hourglass-end"></i> Завершить ход</button>
                 <button id="new-battle-btn" style="background-color: #555; margin-top: 10px;"><i class="fa-solid fa-rotate-right"></i> Новая битва</button>
                 
+                <a href="{% url 'lobby' %}" class="btn-link" style="background-color: #607D8B; margin-top: 10px;"><i class="fa-solid fa-house"></i> В Лобби</a>
                 <a href="{% url 'leaderboard' %}" class="btn-link" style="background-color: #FF9800; margin-top: 10px;"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
                 <a href="{% url 'profile' %}" class="btn-link" style="background-color: #009688; margin-top: 10px;"><i class="fa-solid fa-user"></i> Профиль</a>
                 {% if request.user.role == 'admin' %}
