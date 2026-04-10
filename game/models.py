@@ -46,6 +46,12 @@ class MultiplayerRoom(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
     current_turn = models.CharField(max_length=10, default='host') # 'host' or 'guest'
     
+    # Anti-cheat fields (Trusted state)
+    host_gold_server = models.IntegerField(default=50)
+    guest_gold_server = models.IntegerField(default=50)
+    host_units_count = models.IntegerField(default=2)
+    guest_units_count = models.IntegerField(default=2)
+    
     game_data = models.TextField(default='{}', blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)

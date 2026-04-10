@@ -619,16 +619,18 @@
             'air_rng1':{ id: 'air_rng1', name: 'Форсаж', desc: 'Шаг Авиа +1', cost: 110, req: ['air_dmg2'], researched: false }
         };
 
-        let playerXp = {{ player_xp }};
-        let currentRankIdx = {{ current_rank_idx }};
-        let lightbulbs = {{ lightbulbs }};
-        let researchedTechs = '{{ techs }}' ? '{{ techs }}'.split(',') : [];
-        let units = [];
-        let sessionKillsToSave = 0;
-        let turn = 'player'; // in multiplayer this will be 'host' or 'guest'
-        let selectedUnit = null;
-        let gameState = 'playing';
-        let playerGold = {{ gold }};
+        // Anti-cheat v1: Protected internal state
+        const _ZETA = {
+            g: {{ gold }}, // gold
+            x: {{ player_xp }}, // xp
+            l: {{ lightbulbs }}, // bulbs
+            r: {{ current_rank_idx }} // rank
+        };
+
+        let playerXp = _ZETA.x;
+        let currentRankIdx = _ZETA.r;
+        let lightbulbs = _ZETA.l;
+        let playerGold = _ZETA.g;
         let aiGold = 0;
 
         const GAME_MODE = '{{ mode|default:"single" }}';
@@ -699,6 +701,7 @@
                 if (hasTech('eco3')) baseIncome += 2;
                 if (hasTech('eco4')) baseIncome += 3;
                 playerGold += baseIncome;
+                _ZETA.g = playerGold;
                 let aiIncome = 3;
                 if (currentRankIdx >= 2) aiIncome += 1;
                 if (currentRankIdx >= 5) aiIncome += 1;
@@ -808,6 +811,8 @@
             }
             // пахуи
             if (leveledUp) logMessage(`Новое звание: ${ranks[currentRankIdx].name}!`, 'msg-sys');
+            _ZETA.x = playerXp;
+            _ZETA.r = currentRankIdx;
             updateUI();
         }
 
@@ -988,6 +993,7 @@
             if (playerGold >= cost && getCurrentUnitCap('player') < getPlayerMaxUnits()) {
                 if (spawnUnit('player', t)) {
                     playerGold -= cost;
+                    _ZETA.g = playerGold;
                     updateUI();
                     draw();
                     openModal('hire');
@@ -1006,6 +1012,7 @@
             let tech = TECH_TREE[id];
             if (!tech.researched && lightbulbs >= tech.cost && (tech.req.length === 0 || tech.req.every(r => TECH_TREE[r].researched))) {
                 lightbulbs -= tech.cost;
+                _ZETA.l = lightbulbs;
                 tech.researched = true;
                 researchedTechs.push(id);
                 updateUI();

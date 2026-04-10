@@ -292,7 +292,7 @@ def api_mp_sync(request, room_id):
         role = 'host' if is_host else 'guest'
 
         if request.method == 'GET':
-            room.save(update_fields=['last_activity'])
+            room.save(update_fields=['updated_at'])
 
             return JsonResponse({
                 'status': 'success',
@@ -307,7 +307,48 @@ def api_mp_sync(request, room_id):
                 return JsonResponse({'status': 'error', 'message': 'Not your turn'}, status=400)
                 
             data = json.loads(request.body)
-            room.game_data = data.get('game_data', '{}')
+            new_game_data_raw = data.get('game_data', '{}')
+            new_game_data = json.loads(new_game_data_raw)
+            
+            # --- Anti-Cheat v1: Validation ---
+            from django.utils import timezone
+            now = timezone.now()
+            seconds_elapsed = (now - room.updated_at).total_seconds()
+            
+            # 1. Gold Validation
+            # Max possible income is 9/sec. Let's give a 33% margin for latency and sync batching.
+            max_allowed_income = seconds_elapsed * 12 
+            
+            # The client sends their own gold in 'aiGold_for_opponent' and opponent's gold in 'playerGold_for_opponent'
+            # We must validate the sender's own reported gold.
+            client_gold = new_game_data.get('aiGold_for_opponent', 0)
+            server_gold_before = room.host_gold_server if role == 'host' else room.guest_gold_server
+            
+            # We allow client_gold to be server_gold_before + max_allowed_income
+            # BUT we also need to account for spending. 
+            # Simplified for v1: if client_gold > server_gold_before + max_allowed_income, it's a cheat.
+            if client_gold > server_gold_before + max_allowed_income + 50: # +50 initial buffer
+                return JsonResponse({'status': 'error', 'message': 'Anti-cheat trigger: invalid gold'}, status=400)
+                
+            # 2. Unit Cap Validation
+            client_units = new_game_data.get('units', [])
+            client_my_units_count = len([u for u in client_units if u.get('type') == 'player'])
+            
+            # Max units is 9 (3 base + 6 from techs). 
+            if client_my_units_count > 12: # 12 is safe limit (9 units + HQ + some buffer)
+                return JsonResponse({'status': 'error', 'message': 'Anti-cheat trigger: unit cap exceeded'}, status=400)
+
+            # Update server-side trusted state
+            if role == 'host':
+                room.host_gold_server = client_gold
+                room.host_units_count = client_my_units_count
+            else:
+                room.guest_gold_server = client_gold
+                room.guest_units_count = client_my_units_count
+            
+            # --- End Anti-Cheat ---
+
+            room.game_data = new_game_data_raw
             room.current_turn = 'guest' if role == 'host' else 'host'
             
             if data.get('finished'):
