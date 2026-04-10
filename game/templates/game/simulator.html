@@ -868,6 +868,7 @@
         }
 
         function startBattle() {
+            if(window.playStartSound) window.playStartSound();
             units = [];
             
             playerGold = 50 + (hasTech('eco2') ? 50 : 0);
@@ -976,6 +977,7 @@
         window.buyUnit = function(t) {
             if (turn !== 'player' || gameState !== 'playing') {
                 logMessage("Вы не можете нанимать войска во время чужого хода!", "msg-dmg");
+                if(window.playErrorSound) window.playErrorSound();
                 return;
             }
             let cost = UNIT_TYPES[t].cost;
@@ -986,12 +988,15 @@
                     draw();
                     openModal('hire');
                 }
+            } else {
+                if(window.playErrorSound) window.playErrorSound();
             }
         }
 
         window.buyTech = function(id) {
             if (turn !== 'player' || gameState !== 'playing') {
                 logMessage("Инженерия доступна только в ваш ход!", "msg-dmg");
+                if(window.playErrorSound) window.playErrorSound();
                 return;
             }
             let tech = TECH_TREE[id];
@@ -1016,6 +1021,8 @@
                     }
                 });
                 draw();
+            } else if (!tech.researched) {
+                if(window.playErrorSound) window.playErrorSound();
             }
         }
 
@@ -1364,5 +1371,6 @@
             ctx.shadowColor = "transparent";
         }
     </script>
+    {% include 'game/audio.html' %}
 </body>
 </html>

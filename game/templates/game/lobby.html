@@ -179,6 +179,7 @@
             <div style="color:#aaa; margin-top:5px;">Лобби: {{ user.username }} ({{ rank_name }})</div>
         </div>
         <div class="header-actions">
+            <a href="{% url 'leaderboard' %}" class="btn btn-blue"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
             <a href="{% url 'profile' %}" class="btn btn-gray"><i class="fa-solid fa-user"></i> Профиль</a>
             <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-gray"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
         </div>
@@ -244,5 +245,6 @@
                 .catch(e => console.error("Ошибка авто-обновления:", e));
         }, 2000);
     </script>
+    {% include 'game/audio.html' %}
 </body>
 </html>

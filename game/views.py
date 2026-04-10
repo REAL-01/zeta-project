@@ -139,6 +139,47 @@ def custom_admin_view(request):
     }
     return render(request, 'game/custom_admin.html', context)
 
+@login_required
+def leaderboard_view(request):
+    ranks = [
+        ("Рядовой", "1_private.png"), ("Ефрейтор", "2_efreytor.png"), ("Мл. Сержант", "3_jsergeant.png"), 
+        ("Сержант", "4_sergeant.png"), ("Ст. Сержант", "5_ssergeant.png"), ("Старшина", "6_starshina.png"), 
+        ("Прапорщик", "7_praporshik.png"), ("Ст. Прапорщик", "8_spraporshik.png"), ("Мл. Лейтенант", "9_jleytenant.png"), 
+        ("Лейтенант", "10_leytenant.png"), ("Ст. Лейтенант", "11_sleytenant.png"), ("Капитан", "12_captain.png"), 
+        ("Майор", "13_major.png"), ("Подполковник", "14_jcolonel.png"), ("Полковник", "15_colonel.png"), 
+        ("Генерал-Майор", "16_genmaj.png"), ("Генерал-Лейтенант", "17_genliet.png"), ("Генерал-Полковник", "18_gencol.png"), 
+        ("Генерал Армии", "19_genarmy.png"), ("Генералиссимус", "20_generalisimus.png")
+    ]
+    
+    # Get top 10 players based on wins
+    top_players = Player.objects.filter(role='user').order_by('-wins')[:10]
+    
+    leaderboard_data = []
+    for p in top_players:
+        idx = p.currentRankIdx
+        if idx < 0: idx = 0
+        if idx >= len(ranks): idx = len(ranks) - 1
+        rank_name, rank_icon = ranks[idx]
+        
+        win_rate = 0
+        if p.games_played > 0:
+            win_rate = int((p.wins / p.games_played) * 100)
+            
+        leaderboard_data.append({
+            'username': p.username,
+            'rank_name': rank_name,
+            'rank_icon': rank_icon,
+            'wins': p.wins,
+            'win_rate': win_rate,
+            'gold': p.playerGold,
+            'is_current_user': p == request.user
+        })
+
+    context = {
+        'leaderboard_data': leaderboard_data
+    }
+    return render(request, 'game/leaderboard.html', context)
+
 def api_save_game(request):
     if request.method == 'POST':
         try:

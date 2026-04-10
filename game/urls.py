@@ -9,6 +9,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('api/save/', views.api_save_game, name='api_save'),
     path('profile/', views.profile_view, name='profile'),
+    path('leaderboard/', views.leaderboard_view, name='leaderboard'),
     path('control_panel/', views.custom_admin_view, name='custom_admin'),
     path('lobby/', views.lobby_view, name='lobby'),
     path('api/mp/create/', views.api_mp_create, name='api_mp_create'),

@@ -1,0 +1,71 @@
+<script>
+    // Audio Engine for Zeta Project (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioEnabled = false;
+
+    // Must resume AudioContext after first user interaction (browser policy)
+    document.addEventListener('click', () => {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        audioEnabled = true;
+    }, { once: true });
+
+    function playTone(freq, type, duration, vol=0.1) {
+        if (!audioEnabled || audioCtx.state !== 'running') return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playHover() {
+        playTone(600, 'sine', 0.1, 0.02);
+    }
+
+    function playClick() {
+        playTone(900, 'triangle', 0.15, 0.05);
+        setTimeout(() => playTone(1200, 'sine', 0.1, 0.03), 50);
+    }
+
+    function playError() {
+        playTone(200, 'sawtooth', 0.3, 0.1);
+        setTimeout(() => playTone(180, 'sawtooth', 0.4, 0.1), 100);
+    }
+
+    function playStart() {
+        playTone(300, 'square', 0.5, 0.1);
+        setTimeout(() => playTone(450, 'triangle', 0.8, 0.15), 150);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const attachAudioToButtons = () => {
+            const buttons = document.querySelectorAll('button, .btn, .btn-link');
+            buttons.forEach(btn => {
+                // Prevent duplicate listeners if DOM mutations happen
+                if(!btn.dataset.audioAttached) {
+                    btn.addEventListener('mouseenter', playHover);
+                    btn.addEventListener('mousedown', playClick);
+                    btn.dataset.audioAttached = "true";
+                }
+            });
+        };
+        
+        attachAudioToButtons();
+        
+        // Expose function globally in case of dynamic DOM load
+        window.attachAudioToButtons = attachAudioToButtons;
+        window.playErrorSound = playError;
+        window.playStartSound = playStart;
+    });
+</script>
