@@ -193,6 +193,36 @@
         </div>
     </div>
 
+    <div class="panel glass animate-slide-up" style="margin-top: 40px;">
+        <h2><i class="fa-solid fa-bullhorn"></i> Сводка обновлений (Shield v1.0.3)</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px;">
+            <div>
+                <h3 style="color:var(--primary); font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">🛡️ СТАБИЛИЗАЦИЯ PvP</h3>
+                <ul style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.6; padding-left: 18px; margin: 0;">
+                    <li>Исправлены race conditions при завершении хода в мультиплеере.</li>
+                    <li>Оптимизирован механизм async-опроса состояния комнаты.</li>
+                    <li>Улучшена синхронизация урона и передвижения юнитов.</li>
+                </ul>
+            </div>
+            <div>
+                <h3 style="color:var(--primary); font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">⚡ ПРОИЗВОДИТЕЛЬНОСТЬ</h3>
+                <ul style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.6; padding-left: 18px; margin: 0;">
+                    <li>Включено Gzip-сжатие (загрузка страницы в 3 раза быстрее).</li>
+                    <li>Настроено 30-дневное кэширование статических ресурсов.</li>
+                    <li>Backend масштабирован до 4-х воркеров для стабильной работы.</li>
+                </ul>
+            </div>
+            <div>
+                <h3 style="color:var(--primary); font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">🔐 SHIELD SECURITY</h3>
+                <ul style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.6; padding-left: 18px; margin: 0;">
+                    <li>Match ID Validation: Сессионная привязка игровых результатов.</li>
+                    <li>Защита от накрутки: Минимальное время боя 45 секунд.</li>
+                    <li>Cooldown: Пауза 2 минуты между сохранениями наград.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         setInterval(() => {
             fetch(window.location.href)
