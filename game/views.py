@@ -1,5 +1,10 @@
+import json
 import time
 import uuid
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import Player
 
 VALID_TECHS = {'eco1','eco2','eco3','eco4','cap1','cap2','cap3','inf_hp1','inf_dmg1','inf_hp2','inf_rng','tnk_dmg1','tnk_hp1','tnk_dmg2','tnk_hp2','art_dmg1','art_rng1','art_dmg2','art_mgr','air_dmg1','air_hp1','air_dmg2','air_rng1'}
