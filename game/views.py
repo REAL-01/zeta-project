@@ -1,8 +1,5 @@
-import json
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+import time
+import uuid
 from .models import Player
 
 VALID_TECHS = {'eco1','eco2','eco3','eco4','cap1','cap2','cap3','inf_hp1','inf_dmg1','inf_hp2','inf_rng','tnk_dmg1','tnk_hp1','tnk_dmg2','tnk_hp2','art_dmg1','art_rng1','art_dmg2','art_mgr','air_dmg1','air_hp1','air_dmg2','air_rng1'}
@@ -52,19 +49,10 @@ def play_view(request):
     mode = request.GET.get('mode', 'single')
     room_id = request.GET.get('room')
     
-    if request.user.is_authenticated:
-        role = 'single'
-        if mode == 'multiplayer':
-            if not room_id:
-                return redirect('lobby')
-            from .models import MultiplayerRoom
-            try:
-                room = MultiplayerRoom.objects.get(id=room_id, status__in=['waiting', 'playing'])
-                if request.user != room.host and request.user != room.guest:
-                    return redirect('lobby')
-                role = 'host' if request.user == room.host else 'guest'
-            except MultiplayerRoom.DoesNotExist:
-                return redirect('lobby')
+        # Anti-cheat: Save match start info in session
+        match_id = str(uuid.uuid4())
+        request.session['match_id'] = match_id
+        request.session['match_start_time'] = time.time()
 
         context = {
             'is_guest': False,
@@ -77,6 +65,9 @@ def play_view(request):
             'mode': mode,
             'room_id': room_id,
             'role': role,
+            'match_id': match_id,
+            'v_proj': '0.0.4',
+            'v_anticheat': '1.0.3'
         }
         return render(request, 'game/simulator.html', context)
     else:
@@ -95,6 +86,8 @@ def play_view(request):
             'mode': 'single',
             'room_id': None,
             'role': 'single',
+            'v_proj': '0.0.4',
+            'v_anticheat': '1.0.3'
         }
         return render(request, 'game/simulator.html', context)
 
@@ -183,13 +176,32 @@ def api_save_game(request):
         try:
             data = json.loads(request.body)
             if request.user.is_authenticated:
-                # XP и Bulbs клиент инкрементит корректно от базы, поэтому используем дельту
+                # Anti-cheat 1.0.3: Session-based duration check
+                start_time = request.session.get('match_start_time', 0)
+                client_match_id = data.get('match_id')
+                server_match_id = request.session.get('match_id')
+                last_save = request.session.get('last_save_time', 0)
+                
+                # Cooldown 2 mins
+                if time.time() - last_save < 120:
+                     return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Cooldown active'}, status=400)
+
+                # Match duration check (min 45s)
+                duration = time.time() - start_time
+                if duration < 45:
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Match too short'}, status=400)
+                
+                # Match ID sync
+                if not client_match_id or client_match_id != server_match_id:
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Invalid session'}, status=400)
+
                 xp_diff = data.get('xp', request.user.playerXp) - request.user.playerXp
                 bulbs_diff = data.get('bulbs', request.user.lightbulbs) - request.user.lightbulbs
                 rank_id = data.get('rankIdx', request.user.currentRankIdx)
 
-                if xp_diff > 2000 or bulbs_diff > 500 or rank_id > request.user.currentRankIdx + 2:
-                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat trigger'}, status=400)
+                # Harder limits for 1.0.3
+                if xp_diff > 800 or bulbs_diff > 150 or rank_id > request.user.currentRankIdx + 1:
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Threshold exceeded'}, status=400)
 
                 request.user.playerXp += max(0, xp_diff)
                 request.user.lightbulbs += max(0, bulbs_diff)
@@ -216,6 +228,11 @@ def api_save_game(request):
                         request.user.losses += 1
                 
                 request.user.save()
+                
+                # Mark save time
+                request.session['last_save_time'] = time.time()
+                # Clear match session to prevent double-save
+                request.session['match_id'] = None
             else:
                 ended = data.get('ended', False)
                 if ended:

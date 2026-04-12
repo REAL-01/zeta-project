@@ -171,7 +171,7 @@
                     <div style="display:flex; flex-direction: column;">
                         <h2 style="margin:0; font-size: 1.1rem; border:none; padding:0; letter-spacing: 2px;">ZETA PROJECT</h2>
                         <span style="font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
-                            v0.0.3 <span style="color:var(--primary);">•</span> ZAC v1.0
+                            v0.0.4 <span style="color:var(--primary);">•</span> SHIELD v1.0.3
                         </span>
                     </div>
                 </div>
@@ -482,7 +482,8 @@
                 gold: playerGold,
                 ended: ended,
                 won: won,
-                enemies_killed: sessionKillsToSave
+                enemies_killed: sessionKillsToSave,
+                match_id: "{{ match_id }}"
             };
             sessionKillsToSave = 0;
             fetch('/api/save/', {

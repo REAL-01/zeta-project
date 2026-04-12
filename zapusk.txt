@@ -1,1 +1,0 @@
-.venvScriptspython manage.py runserver
