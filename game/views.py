@@ -49,6 +49,20 @@ def play_view(request):
     mode = request.GET.get('mode', 'single')
     room_id = request.GET.get('room')
     
+    if request.user.is_authenticated:
+        role = 'single'
+        if mode == 'multiplayer':
+            if not room_id:
+                return redirect('lobby')
+            from .models import MultiplayerRoom
+            try:
+                room = MultiplayerRoom.objects.get(id=room_id, status__in=['waiting', 'playing'])
+                if request.user != room.host and request.user != room.guest:
+                    return redirect('lobby')
+                role = 'host' if request.user == room.host else 'guest'
+            except MultiplayerRoom.DoesNotExist:
+                return redirect('lobby')
+
         # Anti-cheat: Save match start info in session
         match_id = str(uuid.uuid4())
         request.session['match_id'] = match_id
