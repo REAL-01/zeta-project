@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Player
 
+VALID_TECHS = {'eco1','eco2','eco3','eco4','cap1','cap2','cap3','inf_hp1','inf_dmg1','inf_hp2','inf_rng','tnk_dmg1','tnk_hp1','tnk_dmg2','tnk_hp2','art_dmg1','art_rng1','art_dmg2','art_mgr','air_dmg1','air_hp1','air_dmg2','air_rng1'}
+
 def index_view(request):
     return render(request, 'game/index.html')
 
@@ -57,7 +59,7 @@ def play_view(request):
                 return redirect('lobby')
             from .models import MultiplayerRoom
             try:
-                room = MultiplayerRoom.objects.get(id=room_id)
+                room = MultiplayerRoom.objects.get(id=room_id, status__in=['waiting', 'playing'])
                 if request.user != room.host and request.user != room.guest:
                     return redirect('lobby')
                 role = 'host' if request.user == room.host else 'guest'
@@ -117,9 +119,6 @@ def profile_view(request):
     if request.user.games_played > 0:
         win_rate = int((request.user.wins / request.user.games_played) * 100)
         
-    from .models import MultiplayerRoom
-    MultiplayerRoom.objects.filter(host=request.user, status='waiting').delete()
-
     context = {
         'user': request.user,
         'rank_name': rank_name,
@@ -195,7 +194,12 @@ def api_save_game(request):
                 request.user.playerXp += max(0, xp_diff)
                 request.user.lightbulbs += max(0, bulbs_diff)
                 request.user.currentRankIdx = rank_id
-                request.user.researchedTechs = data.get('techs', request.user.researchedTechs)
+                techs_raw = data.get('techs', request.user.researchedTechs)
+                if techs_raw:
+                    validated = [t for t in techs_raw.split(',') if t in VALID_TECHS]
+                    request.user.researchedTechs = ','.join(validated)
+                else:
+                    request.user.researchedTechs = ''
                 
                 killed = data.get('enemies_killed', 0)
                 if 0 <= killed <= 50:
@@ -218,8 +222,8 @@ def api_save_game(request):
                     request.session['guest_games_played'] = request.session.get('guest_games_played', 0) + 1
 
             return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        except Exception:
+            return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     return JsonResponse({'status': 'invalid method'}, status=405)
 
 @login_required
@@ -229,6 +233,9 @@ def lobby_view(request):
     import datetime
     
     MultiplayerRoom.objects.filter(host=request.user, status='waiting').delete()
+    
+    stuck_threshold = timezone.now() - datetime.timedelta(minutes=30)
+    MultiplayerRoom.objects.filter(status='playing', updated_at__lt=stuck_threshold).update(status='finished')
     
     time_threshold = timezone.now() - datetime.timedelta(seconds=10)
     rooms = MultiplayerRoom.objects.filter(status='waiting', updated_at__gte=time_threshold).exclude(host=request.user)
@@ -252,7 +259,8 @@ def api_mp_create(request):
     from .models import MultiplayerRoom
     if request.method == 'POST':
         MultiplayerRoom.objects.filter(host=request.user, status='waiting').delete()
-        room = MultiplayerRoom.objects.create(host=request.user, status='waiting')
+        host_gold = 100 if 'eco2' in request.user.researchedTechs else 50
+        room = MultiplayerRoom.objects.create(host=request.user, status='waiting', host_gold_server=host_gold)
         return redirect(f'/play/?mode=multiplayer&room={room.id}')
     return redirect('lobby')
 
@@ -265,7 +273,11 @@ def api_mp_join(request, room_id):
     if request.method == 'POST':
         try:
             room = MultiplayerRoom.objects.select_for_update().get(id=room_id, status='waiting')
+            if request.user == room.host:
+                return redirect('lobby')
+            guest_gold = 100 if 'eco2' in request.user.researchedTechs else 50
             room.guest = request.user
+            room.guest_gold_server = guest_gold
             room.status = 'playing'
             room.save()
             request.session['role'] = 'guest'
@@ -328,19 +340,17 @@ def api_mp_sync(request, room_id):
                 
             # 2. Unit Cap Validation
             client_units = new_game_data.get('units', [])
-            client_my_units_count = len([u for u in client_units if u.get('type') == 'player'])
+            client_sender_units_count = len([u for u in client_units if u.get('type') == 'enemy'])
             
-            # Max units is 9 (3 base + 6 from techs). 
-            if client_my_units_count > 12: # 12 is safe limit (9 units + HQ + some buffer)
+            if client_sender_units_count > 12:
                 return JsonResponse({'status': 'error', 'message': 'Anti-cheat trigger: unit cap exceeded'}, status=400)
 
-            # Update server-side trusted state
             if role == 'host':
                 room.host_gold_server = client_gold
-                room.host_units_count = client_my_units_count
+                room.host_units_count = client_sender_units_count
             else:
                 room.guest_gold_server = client_gold
-                room.guest_units_count = client_my_units_count
+                room.guest_units_count = client_sender_units_count
             
             # --- End Anti-Cheat ---
 

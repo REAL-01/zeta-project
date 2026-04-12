@@ -5,101 +5,41 @@
     <title>База Операций (Лобби) | Zeta Project</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}">
     <style>
-        :root {
-            --bg: #0A0B0A;
-            --surface: rgba(19, 20, 24, 0.75);
-            --surface-hover: rgba(27, 28, 35, 0.85);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #00B4D8;
-            --primary-glow: rgba(0, 180, 216, 0.4);
-            --secondary: #0077B6;
-            --text-main: #e4e2e0;
-            --text-muted: #888;
-        }
-
-        body {
-            margin: 0;
-            padding: 40px;
-            background: var(--bg);
-            color: var(--text-main);
-            font-family: 'Space Grotesk', sans-serif;
-            min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 119, 182, 0.05) 0%, transparent 40%);
-        }
-
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            padding: 20px 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 12px;
+            padding: 15px 30px;
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 { margin: 0; color: #fff; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 2px; }
-        h1 i { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .header h1 { 
+            margin: 0; 
+            color: #fff; 
+            font-size: 1.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 3px;
+            font-family: var(--font-heading);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         
         .header-actions { display: flex; gap: 15px; }
-
-        .btn {
-            padding: 12px 25px;
-            border-radius: 8px; 
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .btn-green { 
-            background: linear-gradient(135deg, var(--secondary), var(--primary)); 
-            color: #fff; 
-            border: none;
-            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.2);
-        }
-        .btn-green:hover { 
-            box-shadow: 0 0 25px rgba(0, 180, 216, 0.4); 
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        .btn-blue { 
-            background: rgba(0, 180, 216, 0.1); 
-            color: var(--primary); 
-            border: 1px solid rgba(0, 180, 216, 0.3); 
-        }
-        .btn-blue:hover { 
-            background: rgba(0, 180, 216, 0.2); 
-            box-shadow: 0 0 20px rgba(0, 180, 216, 0.3); 
-            border-color: var(--primary);
-        }
-
-        .btn-gray { 
-            background: transparent; 
-            color: var(--text-muted); 
-            border: 1px solid var(--border);
-        }
-        .btn-gray:hover { 
-            background: rgba(255, 255, 255, 0.05); 
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
 
         .content-grid {
             display: grid;
@@ -108,22 +48,10 @@
         }
 
         .panel {
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             position: relative;
         }
         
-        .panel::before {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 2px;
-            background: var(--border);
-        }
-
         .panel h2 {
             margin-top: 0;
             border-bottom: 1px solid var(--border);
@@ -132,7 +60,9 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             font-size: 1.3rem;
-            text-shadow: 0 0 5px rgba(0, 180, 216, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .room-list {
@@ -150,14 +80,13 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 15px 20px;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .room-item:hover {
             border-color: var(--primary);
-            background: var(--surface-hover);
-            box-shadow: 0 5px 15px rgba(0, 180, 216, 0.15);
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.02);
+            transform: scale(1.01);
         }
 
         .room-info {
@@ -166,59 +95,92 @@
             gap: 15px;
         }
 
-        @media (max-width: 900px) {
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(0, 180, 216, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary-glow);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1000px) {
             .content-grid { grid-template-columns: 1fr; }
             body { padding: 20px; }
             .header { flex-direction: column; gap: 20px; text-align: center; }
         }
     </style>
 </head>
-<body>
+<body class="scanline">
 
-    <div class="header">
-        <div>
-            <h1><i class="fa-solid fa-satellite-dish" style="color: var(--primary);"></i> Zeta Project</h1>
-            <div style="color:#aaa; margin-top:5px;">Лобби: {{ user.username }} ({{ rank_name }})</div>
+    <div class="header glass animate-pulse">
+        <div class="logo-container">
+            <img src="{% static 'logo.png' %}" alt="Zeta Logo" class="logo-img">
+            <div>
+                <h1>Zeta Project</h1>
+                <div style="color:var(--text-muted); font-size: 0.85rem; margin-top:2px;">
+                    <i class="fa-solid fa-terminal" style="font-size: 0.7rem;"></i> 
+                    {% if is_guest %}
+                    STATUS: <span style="color:var(--primary);">GUEST OPERATIVE</span> 
+                    <span class="status-badge" style="--primary: #999; --primary-glow: rgba(150,150,150,0.2);">UNREGISTERED</span>
+                    {% else %}
+                    OPERATIONS BASE: <span style="color:var(--primary);">{{ user.username }}</span> 
+                    <span class="status-badge">{{ rank_name }}</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div class="header-actions">
-            <a href="{% url 'leaderboard' %}" class="btn btn-blue"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
-            <a href="{% url 'profile' %}" class="btn btn-gray"><i class="fa-solid fa-user"></i> Профиль</a>
-            <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-gray"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
+            {% if not is_guest %}
+                <a href="{% url 'leaderboard' %}" class="btn-premium"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
+                <a href="{% url 'profile' %}" class="btn-premium"><i class="fa-solid fa-user"></i> Профиль</a>
+                <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-premium" style="--primary: var(--danger); --primary-glow: rgba(239, 71, 111, 0.3);">
+                        <i class="fa-solid fa-right-from-bracket"></i> Выход
+                    </button>
+                </form>
+            {% else %}
+                <a href="/" class="btn-premium"><i class="fa-solid fa-house"></i> На Главную</a>
+                <a href="{% url 'register' %}" class="btn-premium btn-primary-action"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+            {% endif %}
         </div>
     </div>
 
     <div class="content-grid">
-        <div class="panel">
+        <div class="panel glass">
             <h2><i class="fa-solid fa-gamepad"></i> Режимы игры</h2>
-            <p style="color:#aaa; margin-bottom: 25px;">Выберите режим, чтобы начать сражение.</p>
+            <p style="color:var(--text-muted); margin-bottom: 25px;">Выберите режим, чтобы начать сражение.</p>
             
-            <a href="{% url 'play' %}?mode=single" class="btn btn-green" style="width:100%; box-sizing:border-box; justify-content:center; margin-bottom: 15px;">
+            <a href="{% url 'play' %}?mode=single" class="btn-premium btn-primary-action" style="width:100%; margin-bottom: 15px;">
                 <i class="fa-solid fa-robot"></i> ОДИНОЧНАЯ ИГРА (vs ИИ)
             </a>
             
             <form action="{% url 'api_mp_create' %}" method="POST">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-blue" style="width:100%; box-sizing:border-box; justify-content:center;">
+                <button type="submit" class="btn-premium" style="width:100%;">
                     <i class="fa-solid fa-users"></i> ПРОВЕСТИ PvP МАТЧ (Создать Комнату)
                 </button>
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel glass">
             <h2><i class="fa-solid fa-list"></i> Доступные комнаты (PvP)</h2>
             <div id="room-list-container" class="room-list">
                 {% for room in rooms %}
-                <div class="room-item">
+                <div class="room-item glass-bright">
                     <div class="room-info">
-                        <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: #888;"></i>
+                        <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary);"></i>
                         <div>
                             <div style="color: #fff; font-weight: bold; font-size: 1.1rem;">{{ room.host.username }}</div>
-                            <div style="color: #aaa; font-size: 0.85rem;">Ожидает противника...</div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem;">Ожидает противника...</div>
                         </div>
                     </div>
                     <form action="{% url 'api_mp_join' room.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-blue" style="padding: 10px 20px;"><i class="fa-solid fa-right-to-bracket"></i> ВОЙТИ</button>
+                        <button type="submit" class="btn-premium" style="padding: 10px 20px;"><i class="fa-solid fa-right-to-bracket"></i> ВОЙТИ</button>
                     </form>
                 </div>
                 {% empty %}
@@ -241,6 +203,19 @@
                     const newRoomList = doc.getElementById('room-list-container');
                     const oldRoomList = document.getElementById('room-list-container');
                     if (newRoomList && oldRoomList) {
+                        const newForms = newRoomList.querySelectorAll('form');
+                        newForms.forEach(form => {
+                            const csrf = form.querySelector('input[name="csrfmiddlewaretoken"]');
+                            if (csrf) csrf.remove();
+                            const existingCsrf = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                            if (existingCsrf) {
+                                const hidden = document.createElement('input');
+                                hidden.type = 'hidden';
+                                hidden.name = 'csrfmiddlewaretoken';
+                                hidden.value = existingCsrf.value;
+                                form.insertBefore(hidden, form.firstChild);
+                            }
+                        });
                         oldRoomList.innerHTML = newRoomList.innerHTML;
                     }
                 })

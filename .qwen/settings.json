@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh *)",
+      "Bash(python *)",
+      "Bash(c:\\users\\nereal\\desktop\\программы\\project_zeta\\venv\\scripts\\python.exe *)",
+      "Bash(scp *)",
+      "Bash(certutil *)",
+      "Bash(powershell *)",
+      "Bash(del *)"
+    ]
+  },
+  "$version": 3
+}

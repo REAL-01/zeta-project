@@ -8,106 +8,62 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}">
     
     <style>
-        :root {
-            --bg-dark: #0A0B0A;
-            --panel-bg: rgba(19, 20, 24, 0.75);
-            --primary: #00B4D8;
-            --primary-hover: #00E5FF;
-            --secondary: #0077b6;
-            --secondary-hover: #0096c7;
-            --text-main: #e4e2e0;
-            --text-muted: #888;
-        }
         body {
-            margin: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
+            overflow-x: hidden;
         }
+        
         #app {
             display: flex;
             margin: auto;
             gap: 40px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(20px);
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
         }
+        
         #left-panel {
             width: 320px;
             display: flex;
             flex-direction: column;
         }
+        
         h2, h3, .rank-name, button, .modal-list-item b {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-heading);
             letter-spacing: 0.5px;
         }
+        
         h2 {
             margin: 0 0 15px 0;
             color: var(--primary);
             text-transform: uppercase;
             font-size: 1.4rem;
-            letter-spacing: 1.5px;
+            letter-spacing: 2.5px;
             border-bottom: 2px solid var(--primary);
             padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
         .info-block {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
         }
-        .info-item {
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-        .info-item:last-child {
-            margin-bottom: 0;
-        }
-        .info-item label, .info-item span {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-        .info-item input {
-            background: #1a1a1a;
-            border: 1px solid #444;
-            color: var(--text-main);
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .info-item input:focus {
-            border-color: var(--primary);
-        }
-        .info-item strong {
-            font-size: 1.1rem;
-            color: #fff;
-        }
-
         
         .profile-card {
-            background: rgba(0, 0, 0, 0.4);
             padding: 20px 15px;
-            border-radius: 10px;
             margin-bottom: 15px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
+        
         .rank-display {
             margin-bottom: 12px;
             display: flex;
@@ -115,33 +71,19 @@
             align-items: center;
             min-height: 100px;
         }
+        
         .rank-display img {
             height: 90px;
             width: auto;
             max-width: 140px;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.7));
-            transition: transform 0.3s;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+            transition: var(--transition);
         }
+        
         .rank-display img:hover {
-            transform: scale(1.05);
+            transform: scale(1.1) rotate(5deg);
         }
-        .profile-name {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #555;
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: center;
-            width: 85%;
-            margin-bottom: 8px;
-            padding: 5px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .profile-name:focus {
-            border-bottom-color: var(--primary);
-        }
+        
         .rank-name {
             color: var(--primary);
             font-size: 1.1rem;
@@ -149,369 +91,154 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--primary-glow);
         }
+
         .xp-container {
             text-align: left;
             background: rgba(0, 0, 0, 0.3);
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
         }
-        .xp-text {
-            font-size: 0.75rem;
-            color: #aaa;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-        }
+
         .xp-bar-bg {
             height: 8px;
-            background: #333;
+            background: #222;
             border-radius: 4px;
             overflow: hidden;
-        }
-        .xp-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            width: 0%;
-            transition: width 0.4s ease-out;
-            box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
         .stats-card {
-            background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             padding: 12px 10px;
             margin-bottom: 15px;
             display: flex;
             justify-content: space-around;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .stat-item i {
-            font-size: 1.3rem;
-            margin-bottom: 6px;
-        }
-        .stat-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            color: #888;
-            margin-bottom: 2px;
-        }
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: bold;
         }
         
-        button, .btn-link {
-            background: rgba(0, 180, 216, 0.1);
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            border: 1px solid rgba(0, 180, 216, 0.3);
-            padding: 12px 15px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            box-sizing: border-box;
-            transition: all 0.3s;
-        }
-        button:hover, .btn-link:hover {
-            background: rgba(0, 180, 216, 0.2);
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(0, 180, 216, 0.2);
-            transform: scale(1.02);
-            border-color: var(--primary);
-        }
-        button:active, .btn-link:active {
-            transform: scale(0.98);
-        }
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.4;
-            filter: grayscale(1);
-        }
         #game-messages {
             margin-top: 15px;
             flex-grow: 1;
-            background: rgba(0, 0, 0, 0.4);
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.85rem;
             overflow-y: auto;
             height: 140px; 
             font-family: 'Consolas', 'Courier New', monospace;
             display: flex;
             flex-direction: column;
+            border: 1px solid var(--border);
         }
-        .msg { margin-bottom: 6px; line-height: 1.3; }
-        .msg-dmg { color: #ff5252; }
-        .msg-heal { color: #69f0ae; }
-        .msg-sys { color: #ffeb3b; font-weight: bold; }
-        #right-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+        
         canvas {
-            background: #111a1d;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 180, 216, 0.2);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-            cursor: crosshair;
+            background: #080C0D;
+            border: 1px solid var(--primary-glow);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
         }
         
         #turn-indicator {
             position: absolute;
-            top: -10px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(20, 20, 25, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 10px 30px;
+            border-radius: 30px;
             border: 1px solid var(--primary);
             color: var(--primary);
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-heading);
             font-weight: bold;
             font-size: 1.1rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
             z-index: 10;
             display: none;
-            text-shadow: 0 0 5px rgba(0,180,216,0.3);
-            transition: all 0.3s;
-        }
-        #turn-indicator.enemy-turn {
-            border-color: #f44336;
-            color: #f44336;
-            text-shadow: 0 0 5px rgba(244,67,54,0.5);
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed; top: 0; left: 0; 
-            width: 100vw; height: 100vh; 
-            background: rgba(0,0,0,0.8); 
-            z-index: 100; 
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: rgba(19, 20, 24, 0.85); 
-            backdrop-filter: blur(25px);
-            padding: 25px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-top: 2px solid var(--primary);
-            color: white; 
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
-            transition: all 0.3s;
-        }
-        .modal-content.wide {
-            min-width: 90vw;
-            max-width: 1200px;
-        }
-        .btn-hire {
-            background: #333;
-            border: 1px solid #555;
-            color: #ccc;
-        }
-        .btn-hire:hover:not(:disabled) {
-            background: #222;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .modal-list-item {
-            padding: 12px; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; justify-content: space-between; align-items: center;
-            gap: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-        .modal-list-item:hover {
-            background: rgba(0,180,216,0.05);
-            border-color: rgba(0,180,216,0.3);
-        }
-        .icon-circle {
-            display: inline-flex; justify-content: center; align-items: center;
-            width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.5);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-        
-        .tech-tree-container {
-            display: flex;
-            justify-content: flex-start;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-        .tech-tree-container::-webkit-scrollbar { height: 8px; }
-        .tech-tree-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-        
-        .tech-column {
-            flex: 0 0 auto;
-            width: 180px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            align-items: center;
-            background: rgba(10, 10, 15, 0.8);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .tech-col-title {
-            color: var(--primary);
-            font-family: 'Space Grotesk', sans-serif;
             text-transform: uppercase;
-            text-align: center;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 8px;
-            width: 100%;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
-        .tech-node {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 12px 10px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-            cursor: pointer;
-            transition: 0.3s;
-            position: relative;
-        }
-        .tech-node:hover { transform: scale(1.05); border-color: rgba(0, 180, 216, 0.5); }
-        .tech-node.locked { border-color: #f44336; opacity: 0.6; filter: grayscale(1); }
-        .tech-node.ready { border-color: #ffeb3b; }
-        .tech-node.researched { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 180, 216, 0.3); }
-        
-        
-        .tech-node:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            bottom: -27px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px;
-            height: 25px;
-            background: #444;
-            z-index: 0;
-        }
-        .tech-node.researched:not(:last-child)::after { background: var(--primary); box-shadow: 0 0 8px var(--primary); }
 
-        
-        
-        @media (max-width: 1000px) {
-            #app {
-                flex-direction: column;
-                padding: 15px;
-                width: 100%;
-                box-sizing: border-box;
-                gap: 15px;
-            }
-            #left-panel, #right-panel {
-                display: contents; 
-            }
-            .mobile-order-1 { order: 1; width: 100%; } 
-            .mobile-order-2 { order: 2; position: static !important; transform: none !important; align-self: center; margin-bottom: -10px; margin-top:10px; } 
-            .mobile-order-3 { order: 3; align-self: center; width: 100%; } 
-            .mobile-order-4 { order: 4; width: 100%; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; } 
-            .mobile-order-5 { order: 5; width: 100%; } 
-            .mobile-order-6 { order: 6; width: 100%; } 
-            .mobile-order-7 { order: 7; width: 100%; } 
-            
-            canvas {
-                width: 100%;
-                max-width: 540px;
-                height: auto;
-                aspect-ratio: 1 / 1;
-            }
-            .modal-content {
-                width: 95% !important;
-                padding: 15px;
-                box-sizing: border-box;
-            }
-            
-            .btn-link, button { margin-top: 0 !important; }
+        .modal-content {
+            border-top: 3px solid var(--primary) !important;
+            box-shadow: 0 0 50px rgba(0,0,0,1) !important;
         }
     </style>
 </head>
-<body>
-    <div id="app">
+<body class="scanline">
+    <div id="app" class="glass">
         <div id="left-panel">
-            <div class="mobile-order-1" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--secondary); padding-bottom: 10px; margin-bottom: 15px;">
-                <div style="display:flex; align-items: center; gap: 10px; flex-wrap: nowrap;">
-                    <h2 style="margin:0; font-size: 1.2rem; letter-spacing: 1px; white-space: nowrap;">ZETA PROJECT</h2>
-                    <span style="font-size: 0.55rem; color: #888; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;">v0.0.3 <span style="color:var(--primary); font-weight:bold;">•</span> ZAC v1.0.0</span>
+            <div class="mobile-order-1" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 20px;">
+                <div class="logo-container" style="padding: 0;">
+                    <img src="{% static 'logo.png' %}" alt="Zeta Logo" style="height: 35px; filter: drop-shadow(0 0 5px var(--primary-glow));">
+                    <div style="display:flex; flex-direction: column;">
+                        <h2 style="margin:0; font-size: 1.1rem; border:none; padding:0; letter-spacing: 2px;">ZETA PROJECT</h2>
+                        <span style="font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                            v0.0.3 <span style="color:var(--primary);">•</span> ZAC v1.0
+                        </span>
+                    </div>
                 </div>
-                <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:#f44336; text-decoration:none; font-size:0.8rem; font-family:'Space Grotesk', sans-serif; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
+                {% if not is_guest %}
+                <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:var(--danger); font-size:0.75rem; text-transform:uppercase; font-family:var(--font-heading); font-weight:700; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
+                {% else %}
+                <a href="{% url 'register' %}" style="text-decoration:none; color:var(--primary); font-size:0.75rem; text-transform:uppercase; font-family:var(--font-heading); font-weight:700; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+                {% endif %}
             </div>
             
-            <div class="profile-card mobile-order-6">
+            <div class="profile-card mobile-order-6 glass-bright animate-pulse">
                 <div class="rank-display">
                     <img id="player-rank-icon" src="/static/rank_icons/1_private.png" alt="Rank">
                 </div>
-                <input type="text" id="player-name-input" value="{{ username }}" placeholder="Позывной" class="profile-name" disabled>
+                <div style="font-weight: bold; font-size: 1.2rem; color: #fff; margin-bottom: 5px;">{{ username }}</div>
                 <div class="rank-name" id="player-rank">Рядовой</div>
                 
                 <div class="xp-container">
-                    <div class="xp-text"><span>Опыт:</span> <strong style="color:#fff;"><span id="player-xp">0</span> / <span id="next-rank-xp">100</span></strong></div>
+                    <div class="xp-text" style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-bottom:4px;">
+                        <span>EXPERIENCE</span> 
+                        <strong style="color:#fff;"><span id="player-xp">0</span> / <span id="next-rank-xp">100</span></strong>
+                    </div>
                     <div class="xp-bar-bg">
-                        <div class="xp-bar-fill" id="xp-bar-fill"></div>
+                        <div class="xp-bar-fill" id="xp-bar-fill" style="background: linear-gradient(90deg, var(--secondary), var(--primary));"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="stats-card mobile-order-5">
-                <div class="stat-item" style="color: #4CAF50">
+            <div class="stats-card mobile-order-5 glass-bright">
+                <div class="stat-item" style="color: var(--success)">
                     <i class="fa-solid fa-users"></i>
-                    <div class="stat-label">Войска</div>
+                    <div class="stat-label">Units</div>
                     <div class="stat-value" id="unit-cap-cnt">0/3</div>
                 </div>
-                <div class="stat-item" style="color: #ffeb3b">
+                <div class="stat-item" style="color: var(--accent)">
                     <i class="fa-solid fa-flask"></i>
-                    <div class="stat-label">Наука</div>
+                    <div class="stat-label">Science</div>
                     <div class="stat-value" id="lightbulbs-cnt">0</div>
                 </div>
-                <div class="stat-item" style="color: #64ffda">
+                <div class="stat-item" style="color: var(--primary)">
                     <i class="fa-solid fa-cubes"></i>
-                    <div class="stat-label">Ресурсы</div>
+                    <div class="stat-label">Credits</div>
                     <div class="stat-value" id="gold-cnt">0</div>
                 </div>
             </div>
 
-            <div class="mobile-order-4">
-                <button id="hire-btn" style="background-color: #2196F3;" onclick="openModal('hire')"><i class="fa-solid fa-person-military-rifle"></i> Нанять Юнитов</button>
-                <button id="research-btn" style="background-color: #9C27B0; margin-top: 10px;" onclick="openModal('research')"><i class="fa-solid fa-microchip"></i> Инженерия</button>
+            <div class="mobile-order-4" style="display: flex; flex-direction: column; gap: 8px;">
+                <button id="hire-btn" class="btn-premium btn-primary-action" onclick="openModal('hire')"><i class="fa-solid fa-person-military-rifle"></i> Deploy Units</button>
+                <button id="research-btn" class="btn-premium" style="--primary: #9C27B0; --primary-glow: rgba(156, 39, 176, 0.3);" onclick="openModal('research')"><i class="fa-solid fa-microchip"></i> Engineering</button>
                 
-                <button id="end-turn-btn" style="background-color: var(--secondary); margin-top: 10px;"><i class="fa-solid fa-hourglass-end"></i> Завершить ход</button>
-                <button id="new-battle-btn" style="background-color: #555; margin-top: 10px;"><i class="fa-solid fa-rotate-right"></i> Новая битва</button>
+                <div style="height:10px;"></div>
+
+                <button id="end-turn-btn" class="btn-premium"><i class="fa-solid fa-hourglass-end"></i> End Turn</button>
+                <button id="new-battle-btn" class="btn-premium" style="--primary: #555; --primary-glow: rgba(85, 85, 85, 0.3);"><i class="fa-solid fa-rotate-right"></i> Reset</button>
                 
-                <a href="{% url 'lobby' %}" class="btn-link" style="background-color: #607D8B; margin-top: 10px;"><i class="fa-solid fa-house"></i> В Лобби</a>
-                <a href="{% url 'leaderboard' %}" class="btn-link" style="background-color: #FF9800; margin-top: 10px;"><i class="fa-solid fa-ranking-star"></i> Зал Славы</a>
-                <a href="{% url 'profile' %}" class="btn-link" style="background-color: #009688; margin-top: 10px;"><i class="fa-solid fa-user"></i> Профиль</a>
-                {% if request.user.role == 'admin' %}
-                <a href="{% url 'custom_admin' %}" class="btn-link" style="background-color: #e91e63; margin-top: 10px;"><i class="fa-solid fa-user-shield"></i> Админ-Панель</a>
-                {% endif %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    {% if not is_guest %}
+                    <a href="{% url 'lobby' %}" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-house"></i> Lobby</a>
+                    <a href="{% url 'profile' %}" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-user"></i> Profile</a>
+                    {% else %}
+                    <a href="/" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-house"></i> На Главную</a>
+                    <a href="{% url 'register' %}" class="btn-premium btn-primary-action" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+                    {% endif %}
+                </div>
             </div>
             
-            <div id="game-messages" class="mobile-order-7">
+            <div id="game-messages" class="mobile-order-7 glass-bright">
                 <div id="messages-content"></div>
             </div>
         </div>
@@ -636,7 +363,7 @@
         let currentRankIdx = _ZETA.r;
         let lightbulbs = _ZETA.l;
         let playerGold = _ZETA.g;
-        let researchedTechs = '{{ techs }}' ? '{{ techs }}'.split(',') : [];
+        let researchedTechs = '{{ techs }}' ? '{{ techs }}'.split(',').filter(t => t) : [];
         let units = [];
         let sessionKillsToSave = 0;
         let turn = 'player'; // in multiplayer this will be 'host' or 'guest'
@@ -649,6 +376,8 @@
         const ROOM_ID = {{ room_id|default:"null" }};
         let mpSyncInterval = null;
         let isMyTurnMp = false;
+        let _turnEndSentAt = 0;
+        let _gameOverProcessed = false;
 
         function updateTurnIndicator() {
             const ind = document.getElementById('turn-indicator');
@@ -685,6 +414,7 @@
             if (GAME_MODE === 'multiplayer') {
                 turn = 'wait';
                 isMyTurnMp = false;
+                _turnEndSentAt = Date.now();
                 updateTurnIndicator();
                 mpSendState(false);
             } else {
@@ -707,24 +437,31 @@
 
         setInterval(() => {
             if (gameState === 'playing') {
-                let baseIncome = 3;
-                if (hasTech('eco1')) baseIncome += 1;
-                if (hasTech('eco3')) baseIncome += 2;
-                if (hasTech('eco4')) baseIncome += 3;
-                playerGold += baseIncome;
-                _ZETA.g = playerGold;
-                let aiIncome = 3;
-                if (currentRankIdx >= 2) aiIncome += 1;
-                if (currentRankIdx >= 5) aiIncome += 1;
-                if (currentRankIdx >= 10) aiIncome += 2;
-                if (currentRankIdx >= 14) aiIncome += 2;
-                aiGold += aiIncome; 
+                if (GAME_MODE !== 'multiplayer' || isMyTurnMp || turn === 'player') {
+                    let baseIncome = 3;
+                    if (hasTech('eco1')) baseIncome += 1;
+                    if (hasTech('eco3')) baseIncome += 2;
+                    if (hasTech('eco4')) baseIncome += 3;
+                    if (currentRankIdx >= 10) baseIncome += 1;
+                    playerGold += baseIncome;
+                    _ZETA.g = playerGold;
+                }
+                    let aiIncome = 4;
+                    if (currentRankIdx >= 2) aiIncome += 2;
+                    if (currentRankIdx >= 5) aiIncome += 2;
+                    if (currentRankIdx >= 10) aiIncome += 3;
+                    if (currentRankIdx >= 14) aiIncome += 3;
+                    aiGold += aiIncome; 
+                }
                 updateUI();
             }
         }, 1000);
 
         loadGame();
         document.fonts.ready.then(() => { updateUI(); startBattle(); });
+
+        setInterval(() => { if (gameState === 'playing') saveGame(); }, 30000);
+        window.addEventListener('beforeunload', () => { if (gameState === 'playing') saveGame(); });
 
         function logMessage(text, colorClass = '') {
             const mc = document.getElementById('messages-content');
@@ -810,7 +547,6 @@
             let p_max = getPlayerMaxUnits();
             const capEl = document.getElementById('unit-cap-cnt');
             if(capEl) capEl.textContent = `${p_cur} / ${p_max}`;
-            saveGame();
         }
 
         function addXp(amount) {
@@ -889,6 +625,7 @@
         function startBattle() {
             if(window.playStartSound) window.playStartSound();
             units = [];
+            _gameOverProcessed = false;
             
             playerGold = 50 + (hasTech('eco2') ? 50 : 0);
             aiGold = 50; 
@@ -911,7 +648,14 @@
             } else {
                 units.push({ type: 'player', uClass: 'hq', x: 4, y: 8, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
                 units.push({ type: 'enemy', uClass: 'hq', x: 4, y: 0, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
-                aiGold = 25 + (currentRankIdx * 10);
+                aiGold = 50 + (currentRankIdx * 10);
+                
+                let aiComp = ['infantry', 'infantry', 'tank'];
+                if (currentRankIdx >= 2) aiComp = ['infantry', 'tank', 'artillery'];
+                if (currentRankIdx >= 6) aiComp = ['tank', 'artillery', 'air'];
+                if (currentRankIdx >= 12) aiComp = ['tank', 'air', 'artillery'];
+                
+                aiComp.forEach(t => { if (spawnUnit('enemy', t)) aiGold -= UNIT_TYPES[t].cost; });
                 turn = 'player';
                 gameState = 'playing';
                 updateTurnIndicator();
@@ -1139,22 +883,34 @@
             
             let attempts = 0;
             let currentAiCap = getCurrentUnitCap('enemy');
-            let aiMaxCap = getPlayerMaxUnits(); // Строго честный лимит - ни на один отряд больше! 
+            let aiMaxCap = 3 + Math.floor(currentRankIdx / 3);
+            if (aiMaxCap > 9) aiMaxCap = 9;
+            let aiInf = units.filter(u => u.type === 'enemy' && u.uClass === 'infantry').length;
+            let aiTnk = units.filter(u => u.type === 'enemy' && u.uClass === 'tank').length;
+            let aiArt = units.filter(u => u.type === 'enemy' && u.uClass === 'artillery').length;
+            let aiAir = units.filter(u => u.type === 'enemy' && u.uClass === 'air').length;
+
             while(attempts < 15 && currentAiCap < aiMaxCap) {
-                let bought = false;
-                let options = ['infantry', 'tank', 'artillery', 'air'].sort(() => Math.random() - 0.5);
-                for(let opt of options) {
-                    if (aiGold >= UNIT_TYPES[opt].cost) {
-                        if (spawnUnit('enemy', opt)) {
-                            aiGold -= UNIT_TYPES[opt].cost;
-                            currentAiCap++;
-                            bought = true;
-                            break; 
-                        }
-                    }
+                let pick = null;
+                // Strategic AI Recruitment Logic
+                if (aiGold >= 30 && aiArt === 0) pick = 'artillery';
+                else if (aiGold >= 40 && aiTnk === 0) pick = 'tank';
+                else if (aiGold >= 40 && aiTnk < aiInf) pick = 'tank';
+                else if (aiGold >= 40 && aiTnk < 3) pick = 'tank';
+                else if (aiGold >= 30 && aiArt < 2) pick = 'artillery';
+                else if (aiGold >= 50 && aiAir < 2) pick = 'air';
+                else if (aiGold >= 15) pick = 'infantry';
+                
+                if (pick && spawnUnit('enemy', pick)) {
+                    aiGold -= UNIT_TYPES[pick].cost;
+                    currentAiCap++;
+                    if (pick === 'infantry') aiInf++;
+                    else if (pick === 'tank') aiTnk++;
+                    else if (pick === 'artillery') aiArt++;
+                    else if (pick === 'air') aiAir++;
+                } else {
+                    break;
                 }
-                // пхй
-                if (!bought) break; 
                 attempts++;
             }
 
@@ -1212,7 +968,7 @@
             }
         }
 
-        function mpSendState(finished = false) {
+        async function mpSendState(finished = false) {
             if (GAME_MODE !== 'multiplayer' || !ROOM_ID) return;
             
             let exportUnits = units.map(u => {
@@ -1228,12 +984,14 @@
                 playerGold_for_opponent: aiGold,
             };
 
-            fetch(`/api/mp/sync/${ROOM_ID}/`, {
-                method: 'POST',
-                keepalive: true,
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished })
-            });
+            try {
+                await fetch(`/api/mp/sync/${ROOM_ID}/`, {
+                    method: 'POST',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished })
+                });
+            } catch(e) {}
 
             if(!finished) mpStartPolling();
         }
@@ -1273,14 +1031,16 @@
                             }
                             draw();
                             
-                            if (!checkDeaths()) {
-                                gameState = 'finished'; // preventing further plays
+                            if (!_gameOverProcessed && !checkDeaths()) {
+                                _gameOverProcessed = true;
+                                gameState = 'finished';
                                 alert("Матч завершен!");
                             }
                             return;
                         }
 
                         if (data.current_turn === GAME_ROLE) {
+                            if (Date.now() - _turnEndSentAt < 3000) return;
                             clearInterval(mpSyncInterval);
                             isMyTurnMp = true;
                             turn = 'player';
@@ -1298,7 +1058,7 @@
                             updateUI();
                             logMessage("Ваш ход!", 'msg-sys');
                             draw();
-                            checkDeaths();
+                            if (!_gameOverProcessed) checkDeaths();
                         }
                     }
                 });

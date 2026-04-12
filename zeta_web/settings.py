@@ -15,11 +15,9 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-50=3j6vm45sx&w-1#trwi3bde42zuyje@*0vhcc-#jjb$4i9rs')
-
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
-
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.0.103,*').split(',')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-zeta-prod-key-777-zac-v1')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'zeta-strategy.ru').split(',') + ['www.zeta-strategy.ru', '89.104.69.135', 'localhost', '127.0.0.1']
 
 
 
@@ -67,8 +65,15 @@ WSGI_APPLICATION = 'zeta_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'u3481426_default'),
+        'USER': os.environ.get('DB_USER', 'u3481426_default'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'dTv5U4H2YnKL1y6x'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
