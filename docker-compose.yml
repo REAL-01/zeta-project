@@ -18,7 +18,7 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             gunicorn --bind 0.0.0.0:8000 zeta_web.wsgi:application"
+             gunicorn --bind 0.0.0.0:8000 --workers 4 zeta_web.wsgi:application"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -29,6 +29,8 @@ services:
       - .env.prod
     depends_on:
       - db
+    networks:
+      - default
 
   nginx:
     image: nginx:latest
@@ -43,6 +45,14 @@ services:
       - media_volume:/app/media
     depends_on:
       - web
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
 
 volumes:
   mysql_data:
