@@ -26,10 +26,8 @@ body {
     background-color: var(--bg-dark);
     background-image: 
         linear-gradient(rgba(0, 180, 216, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 180, 216, 0.02) 1px, transparent 1px),
-        radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(0, 119, 182, 0.05) 0%, transparent 40%);
-    background-size: 50px 50px, 50px 50px, 100% 100%, 100% 100%;
+        linear-gradient(90deg, rgba(0, 180, 216, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px, 50px 50px;
     color: var(--text-main);
     font-family: var(--font-body);
 }
@@ -42,6 +40,8 @@ body {
     border: 1px solid var(--border);
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    position: relative;
+    z-index: 10;
 }
 
 .glass-bright {
@@ -172,5 +172,5 @@ body {
     background: rgba(0, 180, 216, 0.05);
     animation: scanline 8s linear infinite;
     pointer-events: none;
-    z-index: 99998;
+    z-index: 1; /* Sits above background but below the .glass (z-index: 10) */
 }

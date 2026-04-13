@@ -200,11 +200,13 @@
         function goBackOrLobby() {
             if (document.referrer.includes('/play/')) {
                 window.history.back();
+            } else {
                 {% if is_guest %}
                 window.location.href = "/";
                 {% else %}
                 window.location.href = "{% url 'lobby' %}";
                 {% endif %}
+            }
         }
     </script>
     {% include 'game/audio.html' %}
