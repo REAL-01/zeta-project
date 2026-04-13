@@ -540,7 +540,8 @@
         const ROOM_ID = {{ room_id|default:"null" }};
         let mpSyncInterval = null;
         let isMyTurnMp = false;
-        let _turnEndSentAt = 0;
+        let _lastGameVersion = -1;
+        let _waitingForTurnAck = false;
         let _gameOverProcessed = false;
 
         function updateTurnIndicator() {
@@ -592,9 +593,9 @@
                 if (GAME_MODE === 'multiplayer') {
                     turn = 'wait';
                     isMyTurnMp = false;
-                    _turnEndSentAt = Date.now();
+                    _waitingForTurnAck = true;
                     updateTurnIndicator();
-                    mpSendState(true);
+                    mpSendState(false); // false = NOT finished, just end of turn
                 } else {
                     turn = 'ai';
                     setTimeout(aiTurn, 500);
@@ -621,23 +622,24 @@
 
         setInterval(() => {
             if (gameState === 'playing') {
-                if (GAME_MODE !== 'multiplayer' || isMyTurnMp || turn === 'player') {
-                    let baseIncome = 3;
-                    if (hasTech('eco1')) baseIncome += 1;
-                    if (hasTech('eco3')) baseIncome += 2;
-                    if (hasTech('eco4')) baseIncome += 3;
-                    if (currentRankIdx >= 10) baseIncome += 1;
-                    playerGold += baseIncome;
-                    _ZETA.g = playerGold;
-                }
+                // In MP, both players get income constantly (real-time strategy feel)
+                let baseIncome = 3;
+                if (hasTech('eco1')) baseIncome += 1;
+                if (hasTech('eco3')) baseIncome += 2;
+                if (hasTech('eco4')) baseIncome += 3;
+                if (currentRankIdx >= 10) baseIncome += 1;
+                playerGold += baseIncome;
+                _ZETA.g = playerGold;
                 
-                // AI income (calculated but only relevant if not MP)
-                let aiIncome = 4;
-                if (currentRankIdx >= 2) aiIncome += 2;
-                if (currentRankIdx >= 5) aiIncome += 2;
-                if (currentRankIdx >= 10) aiIncome += 3;
-                if (currentRankIdx >= 14) aiIncome += 3;
-                aiGold += aiIncome; 
+                // AI income (only in single player)
+                if (GAME_MODE !== 'multiplayer') {
+                    let aiIncome = 4;
+                    if (currentRankIdx >= 2) aiIncome += 2;
+                    if (currentRankIdx >= 5) aiIncome += 2;
+                    if (currentRankIdx >= 10) aiIncome += 3;
+                    if (currentRankIdx >= 14) aiIncome += 3;
+                    aiGold += aiIncome;
+                }
 
                 updateUI();
             }
@@ -812,18 +814,21 @@
             playerGold = 50 + (hasTech('eco2') ? 50 : 0);
             aiGold = 50; 
             if (GAME_MODE === 'multiplayer') {
+                // Both host and guest create HQs locally so field is visible immediately
+                units.push({ type: 'player', uClass: 'hq', x: 4, y: 8, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                units.push({ type: 'enemy', uClass: 'hq', x: 4, y: 0, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
+                gameState = 'playing';
+                
                 if (GAME_ROLE === 'host') {
-                    units.push({ type: 'player', uClass: 'hq', x: 4, y: 8, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
-                    units.push({ type: 'enemy', uClass: 'hq', x: 4, y: 0, hp: 100, maxHp: 100, damage: [0,0], moveRange: 0, attackRange: 0, hasMoved: true, hasAttacked: true });
                     turn = 'player';
                     isMyTurnMp = true;
-                    gameState = 'playing';
                     updateTurnIndicator();
-                    mpStartPolling(); // Хост тоже опрашивает, чтобы видеть подключение гостя и смену хода
-                } else if (GAME_ROLE === 'guest') {
+                    // Send initial state so server has data for guest
+                    mpSendState(false, true);
+                    mpStartPolling();
+                } else {
                     turn = 'wait';
                     isMyTurnMp = false;
-                    gameState = 'playing';
                     updateTurnIndicator();
                     mpStartPolling();
                 }
@@ -1151,7 +1156,7 @@
             }
         }
 
-        async function mpSendState(finished = false) {
+        async function mpSendState(finished = false, initial = false) {
             if (GAME_MODE !== 'multiplayer' || !ROOM_ID) return;
             
             let exportUnits = units.map(u => {
@@ -1168,84 +1173,97 @@
             };
 
             try {
-                await fetch(`/api/mp/sync/${ROOM_ID}/`, {
+                const resp = await fetch(`/api/mp/sync/${ROOM_ID}/`, {
                     method: 'POST',
-                    keepalive: true,
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                    body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished })
+                    body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished, initial: initial })
                 });
-            } catch(e) {}
-
-            if(!finished) mpStartPolling();
+                const result = await resp.json();
+                if (result.game_version !== undefined) {
+                    _lastGameVersion = result.game_version;
+                }
+            } catch(e) {
+                console.error('mpSendState error:', e);
+                // Retry once after 2s on failure (except initial pushes)
+                if (!initial && !finished) {
+                    setTimeout(() => mpSendState(finished, initial), 2000);
+                }
+            }
         }
 
         function mpStartPolling() {
             if (GAME_MODE !== 'multiplayer') return;
             if (mpSyncInterval) clearInterval(mpSyncInterval);
+            
             mpSyncInterval = setInterval(() => {
                 fetch(`/api/mp/sync/${ROOM_ID}/`)
                 .then(r => r.json())
                 .then(data => {
-                    if (data.status === 'success') {
-                        if (data.room_status === 'waiting' && GAME_ROLE === 'host') {
-                            let ind = document.getElementById('turn-indicator');
+                    if (data.status !== 'success') return;
+                    
+                    // Host waiting for guest to join
+                    if (data.room_status === 'waiting' && GAME_ROLE === 'host') {
+                        let ind = document.getElementById('turn-indicator');
+                        if (ind) {
                             ind.className = 'enemy-turn';
                             ind.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> ' + t('sim.waiting_commander');
-                            return;
-                        } else if (data.current_turn !== GAME_ROLE) {
-                            if (isMyTurnMp) { // Если в коде еще "мой ход", а сервер говорит "чужой"
-                                isMyTurnMp = false;
-                                turn = 'wait';
-                                updateTurnIndicator();
-                            }
-                            let ind = document.getElementById('turn-indicator');
-                            ind.className = 'enemy-turn';
-                            ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> ' + t('sim.opponent_turn');
                         }
-                        
-                        if (data.room_status === 'finished') {
-                            clearInterval(mpSyncInterval);
-                            
-                            if (data.game_data && data.game_data !== '{}') {
-                                let incomingData = JSON.parse(data.game_data);
-                                units = incomingData.units || [];
-                                if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
-                                if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
-                            }
-                            draw();
-                            
-                            if (!_gameOverProcessed && !checkDeaths()) {
-                                _gameOverProcessed = true;
+                        return;
+                    }
+                    
+                    // Game finished by opponent
+                    if (data.room_status === 'finished') {
+                        clearInterval(mpSyncInterval);
+                        if (data.game_data && data.game_data !== '{}' && data.game_version > _lastGameVersion) {
+                            _lastGameVersion = data.game_version;
+                            let incomingData = JSON.parse(data.game_data);
+                            units = incomingData.units || [];
+                            if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
+                            if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
+                        }
+                        draw();
+                        if (!_gameOverProcessed) {
+                            _gameOverProcessed = true;
+                            if (!checkDeaths()) {
                                 gameState = 'finished';
                                 alert(t('sim.match_finished'));
                             }
-                            return;
                         }
-
-                        if (data.current_turn === GAME_ROLE) {
-                            if (Date.now() - _turnEndSentAt < 3000) return;
-                            clearInterval(mpSyncInterval);
-                            isMyTurnMp = true;
-                            turn = 'player';
+                        return;
+                    }
+                    
+                    // It's my turn AND there's new data from server
+                    if (data.current_turn === GAME_ROLE && data.game_version > _lastGameVersion) {
+                        _lastGameVersion = data.game_version;
+                        _waitingForTurnAck = false;
+                        isMyTurnMp = true;
+                        turn = 'player';
+                        updateTurnIndicator();
+                        
+                        if (data.game_data && data.game_data !== '{}') {
+                            let incomingData = JSON.parse(data.game_data);
+                            units = incomingData.units || [];
+                            if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
+                            if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
+                        }
+                        
+                        units.forEach(u => { if (u.type === 'player') { u.hasMoved = false; u.hasAttacked = false; }});
+                        
+                        updateUI();
+                        logMessage(t('sim.your_turn'), 'msg-sys');
+                        draw();
+                        if (!_gameOverProcessed) checkDeaths();
+                    } else if (data.current_turn !== GAME_ROLE) {
+                        // Not my turn — show waiting indicator
+                        if (isMyTurnMp) {
+                            isMyTurnMp = false;
+                            turn = 'wait';
                             updateTurnIndicator();
-                            
-                           if (data.game_data && data.game_data !== '{}') {
-                                let incomingData = JSON.parse(data.game_data);
-                                units = incomingData.units || [];
-                                if (incomingData.aiGold_for_opponent !== undefined) aiGold = incomingData.aiGold_for_opponent;
-                                if (incomingData.playerGold_for_opponent !== undefined) playerGold = incomingData.playerGold_for_opponent;
-                            }
-                            
-                            units.forEach(u => { if (u.type === 'player') { u.hasMoved=false; u.hasAttacked=false; }});
-                            
-                            updateUI();
-                            logMessage(t('sim.your_turn'), 'msg-sys');
-                            draw();
-                            if (!_gameOverProcessed) checkDeaths();
                         }
                     }
-                });
-            }, 1000);
+                })
+                .catch(e => console.error('Polling error:', e));
+            }, 1500);
         }
 
         function draw() {

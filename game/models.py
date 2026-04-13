@@ -53,6 +53,7 @@ class MultiplayerRoom(models.Model):
     guest_units_count = models.IntegerField(default=2)
     
     game_data = models.TextField(default='{}', blank=True)
+    game_version = models.IntegerField(default=0)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
