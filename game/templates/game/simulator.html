@@ -1253,6 +1253,10 @@
                         logMessage(t('sim.your_turn'), 'msg-sys');
                         draw();
                         if (!_gameOverProcessed) checkDeaths();
+                    } else if (data.current_turn === GAME_ROLE && isMyTurnMp) {
+                        // Already my turn, no new data — just refresh indicator
+                        // This handles the case when guest joins and room switches from 'waiting' to 'playing'
+                        updateTurnIndicator();
                     } else if (data.current_turn !== GAME_ROLE) {
                         // Not my turn — show waiting indicator
                         if (isMyTurnMp) {
