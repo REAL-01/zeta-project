@@ -118,6 +118,11 @@
         </div>
         <div class="header-actions">
             {% if not is_guest %}
+                {% if user.role == 'admin' or user.is_superuser %}
+                <a href="{% url 'custom_admin' %}" class="btn-premium" style="--primary: #FFB703; --primary-glow: rgba(255, 183, 3, 0.3);">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> <span>Control Panel</span>
+                </a>
+                {% endif %}
                 <a href="{% url 'leaderboard' %}" class="btn-premium"><i class="fa-solid fa-ranking-star"></i> <span data-i18n="lobby.hall_of_fame">Hall of Fame</span></a>
                 <a href="{% url 'profile' %}" class="btn-premium"><i class="fa-solid fa-user"></i> <span data-i18n="lobby.profile">Profile</span></a>
                 <form action="{% url 'logout' %}" method="POST" style="display:inline;">
