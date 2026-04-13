@@ -1,27 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Вход в Систему | Zeta Project</title>
+    <title>Authorization | Zeta Project</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}?v=1.0.6">
     <style>
-        :root {
-            --bg: #0a0b0a;
-            --surface: rgba(19, 20, 24, 0.75);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #00B4D8;
-            --text: #e4e2e0;
-        }
-
         body {
             margin: 0;
             padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Space Grotesk', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -178,8 +168,8 @@
     <div class="auth-container">
         <div class="logo-wrap">
             <i class="fa-solid fa-fingerprint"></i>
-            <h2>Вход</h2>
-            <p class="subtitle">Идентификация Командира</p>
+            <h2 data-i18n="login.title">Sign In</h2>
+            <p class="subtitle" data-i18n="login.subtitle">Commander Identification</p>
         </div>
 
         {% if error %}
@@ -189,22 +179,23 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <input type="text" name="username" placeholder="Позывной" required>
+                <input type="text" name="username" data-i18n="login.callsign" placeholder="Callsign" required>
                 <i class="fa-solid fa-user"></i>
             </div>
             <div class="form-group">
-                <input type="password" name="password" placeholder="Код Доступа" required>
+                <input type="password" name="password" data-i18n="login.accesscode" placeholder="Access Code" required>
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <button type="submit" class="btn-submit">Авторизация</button>
+            <button type="submit" class="btn-submit" data-i18n="login.submit">Authorize</button>
         </form>
 
         <div class="footer-links">
-            Нет допуска? <a href="{% url 'register' %}">Сформировать профиль</a><br><br>
-            <a href="{% url 'index' %}" style="color:#666;"><i class="fa-solid fa-arrow-left"></i> На базу</a>
+            <span data-i18n="login.no_clearance">No clearance?</span> <a href="{% url 'register' %}" data-i18n="login.create_profile">Create Profile</a><br><br>
+            <a href="{% url 'index' %}" style="color:#666;"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="login.back_to_base">Back to Base</span></a>
         </div>
     </div>
 
     {% include 'game/audio.html' %}
+    <script src="{% static 'js/i18n.js' %}?v=1.0.6"></script>
 </body>
 </html>

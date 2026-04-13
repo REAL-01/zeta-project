@@ -148,3 +148,8 @@ cython_debug/
 
 # PyCharm
 .idea/
+
+# Sensitive local files
+.env.prod
+.ssh/
+certs/

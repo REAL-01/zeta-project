@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Зал Славы | Zeta Project</title>
+    <title>Hall of Fame | Zeta Project</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/branding.css' %}">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}?v=1.0.5">
     <style>
         body {
             padding: 40px;
@@ -132,7 +132,7 @@
         <div class="logo-container" style="justify-content: center; margin-bottom: 15px;">
             <img src="{% static 'logo.png' %}" alt="Zeta Logo" class="logo-img" style="height: 60px;">
         </div>
-        <h1>Зал Славы</h1>
+        <h1 data-i18n="lb.title">Hall of Fame</h1>
         <p>TOP-10 COMMANDERS • COMBAT RECORDS</p>
     </div>
 
@@ -140,10 +140,10 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 60px;">Место</th>
-                    <th>Командир</th>
-                    <th style="text-align: center;">Победы</th>
-                    <th style="text-align: center;">Винрейт</th>
+                    <th style="width: 60px;" data-i18n="lb.rank">Rank</th>
+                    <th data-i18n="lb.commander">Commander</th>
+                    <th style="text-align: center;" data-i18n="lb.wins">Wins</th>
+                    <th style="text-align: center;" data-i18n="lb.winrate">Win Rate</th>
                 </tr>
             </thead>
             <tbody>
@@ -162,10 +162,10 @@
                     </td>
                     <td>
                         <div class="player-info">
-                            <img src="/static/rank_icons/{{ p.rank_icon }}" alt="Звание" title="{{ p.rank_name }}">
+                            <img src="/static/rank_icons/{{ p.rank_icon }}" alt="Rank" title="{{ p.rank_name }}">
                             <div>
                                 <div style="color:#fff; font-weight:600;">{{ p.username }}</div>
-                                <div style="font-size:0.85rem; color:var(--text-muted);">{{ p.rank_name }}</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted);" data-i18n-rank="{{ p.rank_idx }}">{{ p.rank_name }}</div>
                             </div>
                         </div>
                     </td>
@@ -180,7 +180,7 @@
                 <tr>
                     <td colspan="4" style="text-align:center; padding: 40px; color:var(--text-muted);">
                         <i class="fa-solid fa-satellite" style="font-size: 3rem; margin-bottom:15px; opacity: 0.5;"></i><br>
-                        База данных пуста. Запишите свое имя в историю первым!
+                        <span data-i18n="lb.empty">Database is empty. Be the first to write your name in history!</span>
                     </td>
                 </tr>
                 {% endfor %}
@@ -189,16 +189,15 @@
     </div>
 
     <div class="header-actions" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
-        <a href="javascript:void(0);" onclick="goBackOrLobby();" class="btn-premium"><i class="fa-solid fa-arrow-left"></i> Назад</a>
+        <a href="javascript:void(0);" onclick="goBackOrLobby();" class="btn-premium"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="lb.back">Back</span></a>
         {% if is_guest %}
-            <a href="/" class="btn-premium"><i class="fa-solid fa-house"></i> На Главную</a>
-            <a href="{% url 'register' %}" class="btn-premium btn-primary-action"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+            <a href="/" class="btn-premium"><i class="fa-solid fa-house"></i> <span data-i18n="profile.home">Home</span></a>
+            <a href="{% url 'register' %}" class="btn-premium btn-primary-action"><i class="fa-solid fa-user-plus"></i> <span data-i18n="profile.register">Register</span></a>
         {% endif %}
     </div>
 
     <script>
         function goBackOrLobby() {
-            // Если пришли из боя (симулятора), идем назад по истории, чтобы не сбросить сессию
             if (document.referrer.includes('/play/')) {
                 window.history.back();
                 {% if is_guest %}
@@ -209,5 +208,6 @@
         }
     </script>
     {% include 'game/audio.html' %}
+    <script src="{% static 'js/i18n.js' %}?v=1.0.6"></script>
 </body>
 </html>

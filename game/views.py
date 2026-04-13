@@ -180,6 +180,7 @@ def leaderboard_view(request):
             'username': p.username,
             'rank_name': rank_name,
             'rank_icon': rank_icon,
+            'rank_idx': idx,
             'wins': p.wins,
             'win_rate': win_rate,
             'is_current_user': p == request.user

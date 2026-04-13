@@ -1,27 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Регистрация | Zeta Project</title>
+    <title>Registration | Zeta Project</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}?v=1.0.6">
     <style>
-        :root {
-            --bg: #0a0b0a;
-            --surface: rgba(19, 20, 24, 0.75);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #00B4D8;
-            --text: #e4e2e0;
-        }
-
         body {
             margin: 0;
             padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Space Grotesk', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -178,8 +168,8 @@
     <div class="auth-container">
         <div class="logo-wrap">
             <i class="fa-solid fa-id-card"></i>
-            <h2>Регистрация</h2>
-            <p class="subtitle">Создание нового профиля</p>
+            <h2 data-i18n="reg.title">Registration</h2>
+            <p class="subtitle" data-i18n="reg.subtitle">Create New Commander Profile</p>
         </div>
 
         {% if error %}
@@ -189,25 +179,26 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <input type="text" name="username" placeholder="Желаемый Позывной" required>
+                <input type="text" name="username" data-i18n="reg.callsign" placeholder="Desired Callsign" required>
                 <i class="fa-solid fa-user-plus"></i>
             </div>
             <div class="form-group">
-                <input type="password" name="password" placeholder="Секретный Код" required>
+                <input type="password" name="password" data-i18n="reg.secret" placeholder="Secret Code" required>
                 <i class="fa-solid fa-lock"></i>
             </div>
             <div class="form-group">
-                <input type="password" name="password_confirm" placeholder="Повторите Код" required>
+                <input type="password" name="password_confirm" data-i18n="reg.confirm" placeholder="Confirm Code" required>
                 <i class="fa-solid fa-check-double"></i>
             </div>
-            <button type="submit" class="btn-submit">Вступить в ряды</button>
+            <button type="submit" class="btn-submit" data-i18n="reg.submit">Enlist</button>
         </form>
 
         <div class="footer-links">
-            Уже есть профиль? <a href="{% url 'login' %}">Войти</a>
+            <span data-i18n="reg.has_profile">Already have a profile?</span> <a href="{% url 'login' %}" data-i18n="reg.signin">Sign In</a>
         </div>
     </div>
 
     {% include 'game/audio.html' %}
+    <script src="{% static 'js/i18n.js' %}?v=1.0.6"></script>
 </body>
 </html>

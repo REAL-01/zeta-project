@@ -1,251 +1,413 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     {% load static %}
     <title>Zeta Project: WEB strategy</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/branding.css' %}">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}?v=1.0.6">
     
     <style>
         body {
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
         
         #app {
-            display: flex;
-            margin: auto;
-            gap: 40px;
-            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            width: 100%;
+            max-width: 1200px;
+            gap: 20px;
+            padding: 20px;
             position: relative;
+            box-sizing: border-box;
         }
         
         #left-panel {
-            width: 320px;
             display: flex;
             flex-direction: column;
+            gap: 15px;
+            min-width: 0;
+            width: 100%;
         }
         
-        h2, h3, .rank-name, button, .modal-list-item b {
-            font-family: var(--font-heading);
-            letter-spacing: 0.5px;
-        }
-        
-        h2 {
-            margin: 0 0 15px 0;
-            color: var(--primary);
-            text-transform: uppercase;
-            font-size: 1.4rem;
-            letter-spacing: 2.5px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
+        #right-panel {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: flex-start;
+            min-width: 0;
+            width: 100%;
         }
 
-        .info-block {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border);
-            padding: 15px;
+        .viewport-container {
+            width: 100%;
+            max-width: 540px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background: #000;
+            border: 2px solid var(--border-bright);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px var(--primary-glow);
             border-radius: 8px;
-            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
+
+        #game-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            image-rendering: pixelated; /* Crisp grid */
+        }
+
+        /* Enhanced Mobile Support */
+        @media (max-width: 750px) {
+            #app {
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 10px !important;
+            }
+            #right-panel { order: -1; margin-bottom: 20px; } /* Game field ON TOP */
+            .viewport-container {
+                max-width: 95vw !important;
+                width: 95vw !important;
+            }
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .profile-card {
-            padding: 20px 15px;
-            margin-bottom: 15px;
+            padding: 20px;
             text-align: center;
             position: relative;
         }
         
         .rank-display {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100px;
+            height: 110px;
         }
         
         .rank-display img {
-            height: 90px;
-            width: auto;
-            max-width: 140px;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+            height: 100px;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
             transition: var(--transition);
         }
         
-        .rank-display img:hover {
-            transform: scale(1.1) rotate(5deg);
-        }
-        
-        .rank-name {
-            color: var(--primary);
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-
         .xp-container {
-            text-align: left;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            margin-top: 15px;
         }
 
-        .xp-bar-bg {
-            height: 8px;
-            background: #222;
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
         .stats-card {
-            border-radius: 8px;
-            padding: 12px 10px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 15px;
         }
-        
-        #game-messages {
-            margin-top: 15px;
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            overflow-y: auto;
-            height: 140px; 
-            font-family: 'Consolas', 'Courier New', monospace;
+
+        .stat-item {
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border);
+            align-items: center;
+            gap: 5px;
         }
-        
-        canvas {
-            background: #080C0D;
-            border: 1px solid var(--primary-glow);
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-weight: bold; font-size: 1rem; }
+
+        #game-messages {
+            height: 180px;
+            padding: 12px;
+            font-size: 0.8rem;
+            overflow-y: auto;
+            border-left: 2px solid var(--primary-glow);
+            background: rgba(0,0,0,0.2);
         }
         
         #turn-indicator {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 30px;
-            border-radius: 30px;
-            border: 1px solid var(--primary);
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: rgba(0, 180, 216, 0.1);
+            border: 1px solid var(--primary-glow);
             color: var(--primary);
             font-family: var(--font-heading);
             font-weight: bold;
-            font-size: 1.1rem;
-            z-index: 10;
-            display: none;
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        .enemy-turn {
+            background: rgba(239, 71, 111, 0.1) !important;
+            border-color: rgba(239, 71, 111, 0.3) !important;
+            color: var(--danger) !important;
+        }
+
+        /* Modal & UI Overhaul */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease-out;
         }
 
         .modal-content {
-            border-top: 3px solid var(--primary) !important;
-            box-shadow: 0 0 50px rgba(0,0,0,1) !important;
+            background: var(--surface-bright);
+            border: 1px solid var(--border-bright);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px var(--primary-glow);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 90vw;
+            position: relative;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-content.wide { width: 95vw !important; max-width: 1100px; }
+
+        .modal-list-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+
+        .modal-list-item:hover {
+            background: rgba(0, 180, 216, 0.08);
+            border-color: var(--primary-glow);
+            transform: translateX(5px);
+        }
+
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            background: #111;
+            border: 1px solid var(--border-bright);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .btn-hire {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px var(--primary-glow);
+        }
+
+        .btn-hire:disabled {
+            background: #444;
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Tech Tree Specifics */
+        .tech-tree-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 10px 5px;
+        }
+
+        .tech-column {
+            flex: 1 1 0;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tech-col-title {
+            font-family: var(--font-heading);
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .tech-node {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-node:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .tech-node.ready {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .tech-node.researched {
+            border-color: var(--success);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .tech-node.researched::after {
+            content: '✓';
+            position: absolute;
+            top: 5px; right: 10px;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .tech-node.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .tech-node.locked:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        @media (max-width: 600px) {
+            .tech-tree-container {
+                flex-direction: column;
+                overflow-x: hidden;
+            }
+            .tech-column {
+                flex: 1;
+            }
         }
     </style>
 </head>
 <body class="scanline">
     <div id="app" class="glass">
         <div id="left-panel">
-            <div class="mobile-order-1" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 20px;">
-                <div class="logo-container" style="padding: 0;">
-                    <img src="{% static 'logo.png' %}" alt="Zeta Logo" style="height: 35px; filter: drop-shadow(0 0 5px var(--primary-glow));">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 5px;">
+                <div class="logo-container" style="padding: 0; gap: 10px;">
+                    <img src="{% static 'logo.png' %}" alt="Logo" style="height: 30px;">
                     <div style="display:flex; flex-direction: column;">
-                        <h2 style="margin:0; font-size: 1.1rem; border:none; padding:0; letter-spacing: 2px;">ZETA PROJECT</h2>
-                        <span style="font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
-                            v0.0.4 <span style="color:var(--primary);">•</span> SHIELD v1.0.3
-                        </span>
+                        <span style="font-weight:bold; font-size: 0.9rem; letter-spacing: 1px;">ZETA PROJECT</span>
+                        <span style="font-size: 0.5rem; color: var(--text-muted);">v0.0.4 • SHIELD v1.0.3</span>
                     </div>
                 </div>
-                {% if not is_guest %}
-                <form action="{% url 'logout' %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" style="background:none; border:none; padding:0; cursor:pointer; color:var(--danger); font-size:0.75rem; text-transform:uppercase; font-family:var(--font-heading); font-weight:700; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7"><i class="fa-solid fa-right-from-bracket"></i> Выход</button></form>
-                {% else %}
-                <a href="{% url 'register' %}" style="text-decoration:none; color:var(--primary); font-size:0.75rem; text-transform:uppercase; font-family:var(--font-heading); font-weight:700; opacity:0.7; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
-                {% endif %}
-            </div>
-            
-            <div class="profile-card mobile-order-6 glass-bright animate-pulse">
-                <div class="rank-display">
-                    <img id="player-rank-icon" src="/static/rank_icons/1_private.png" alt="Rank">
-                </div>
-                <div style="font-weight: bold; font-size: 1.2rem; color: #fff; margin-bottom: 5px;">{{ username }}</div>
-                <div class="rank-name" id="player-rank">Рядовой</div>
-                
-                <div class="xp-container">
-                    <div class="xp-text" style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-bottom:4px;">
-                        <span>EXPERIENCE</span> 
-                        <strong style="color:#fff;"><span id="player-xp">0</span> / <span id="next-rank-xp">100</span></strong>
-                    </div>
-                    <div class="xp-bar-bg">
-                        <div class="xp-bar-fill" id="xp-bar-fill" style="background: linear-gradient(90deg, var(--secondary), var(--primary));"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-card mobile-order-5 glass-bright">
-                <div class="stat-item" style="color: var(--success)">
-                    <i class="fa-solid fa-users"></i>
-                    <div class="stat-label">Units</div>
-                    <div class="stat-value" id="unit-cap-cnt">0/3</div>
-                </div>
-                <div class="stat-item" style="color: var(--accent)">
-                    <i class="fa-solid fa-flask"></i>
-                    <div class="stat-label">Science</div>
-                    <div class="stat-value" id="lightbulbs-cnt">0</div>
-                </div>
-                <div class="stat-item" style="color: var(--primary)">
-                    <i class="fa-solid fa-cubes"></i>
-                    <div class="stat-label">Credits</div>
-                    <div class="stat-value" id="gold-cnt">0</div>
-                </div>
-            </div>
-
-            <div class="mobile-order-4" style="display: flex; flex-direction: column; gap: 8px;">
-                <button id="hire-btn" class="btn-premium btn-primary-action" onclick="openModal('hire')"><i class="fa-solid fa-person-military-rifle"></i> Deploy Units</button>
-                <button id="research-btn" class="btn-premium" style="--primary: #9C27B0; --primary-glow: rgba(156, 39, 176, 0.3);" onclick="openModal('research')"><i class="fa-solid fa-microchip"></i> Engineering</button>
-                
-                <div style="height:10px;"></div>
-
-                <button id="end-turn-btn" class="btn-premium"><i class="fa-solid fa-hourglass-end"></i> End Turn</button>
-                <button id="new-battle-btn" class="btn-premium" style="--primary: #555; --primary-glow: rgba(85, 85, 85, 0.3);"><i class="fa-solid fa-rotate-right"></i> Reset</button>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                <div style="display:flex; gap: 15px; align-items:center;">
                     {% if not is_guest %}
-                    <a href="{% url 'lobby' %}" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-house"></i> Lobby</a>
-                    <a href="{% url 'profile' %}" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-user"></i> Profile</a>
-                    {% else %}
-                    <a href="/" class="btn-premium" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-house"></i> На Главную</a>
-                    <a href="{% url 'register' %}" class="btn-premium btn-primary-action" style="font-size: 0.75rem; padding: 10px;"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+                    <form action="{% url 'logout' %}" method="POST">{% csrf_token %}<button type="submit" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:0.7rem;"><i class="fa-solid fa-power-off"></i></button></form>
                     {% endif %}
                 </div>
             </div>
             
-            <div id="game-messages" class="mobile-order-7 glass-bright">
+            <div class="profile-card glass-bright animate-pulse">
+                <div class="rank-display">
+                    <img id="player-rank-icon" src="/static/rank_icons/1_private.png" alt="Rank">
+                </div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: #fff; margin-bottom: 2px;">{{ username }}</div>
+                <div class="rank-name" id="player-rank" style="font-size: 0.9rem; margin-bottom: 15px;">Private</div>
+                
+                <div class="xp-container">
+                    <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--text-muted); margin-bottom:5px;">
+                        <span id="lbl-level-progression">LEVEL PROGRESSION</span> 
+                        <strong><span id="player-xp">0</span> / <span id="next-rank-xp">100</span></strong>
+                    </div>
+                    <div class="xp-bar-bg">
+                        <div class="xp-bar-fill" id="xp-bar-fill" style="width:0%; background: linear-gradient(90deg, var(--secondary), var(--primary)); height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card glass-bright">
+                <div class="stat-item" style="color: var(--success)">
+                    <i class="fa-solid fa-person-military-pointing"></i>
+                    <div class="stat-label">Units</div>
+                    <div class="stat-value" id="unit-cap-cnt">0/3</div>
+                </div>
+                <div class="stat-item" style="color: var(--accent)">
+                    <i class="fa-solid fa-microchip"></i>
+                    <div class="stat-label">Science</div>
+                    <div class="stat-value" id="lightbulbs-cnt">0</div>
+                </div>
+                <div class="stat-item" style="color: var(--primary)">
+                    <i class="fa-solid fa-coins"></i>
+                    <div class="stat-label">Gold</div>
+                    <div class="stat-value" id="gold-cnt">0</div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button id="hire-btn" class="btn-premium btn-primary-action"><i class="fa-solid fa-plus"></i> <span data-i18n="sim.deploy_units">Deploy Base Units</span></button>
+                <button id="research-btn" class="btn-premium" style="--primary: #9C27B0; --primary-glow: rgba(156, 39, 176, 0.2);"><i class="fa-solid fa-flask"></i> <span data-i18n="sim.tech_lab">Tech Laboratory</span></button>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                    <button id="end-turn-btn" class="btn-premium" style="--primary: var(--success); --primary-glow: rgba(6, 214, 160, 0.2);"><i class="fa-solid fa-forward"></i> <span data-i18n="sim.turn">Turn</span></button>
+                    <button id="new-battle-btn" class="btn-premium" style="--primary: #666; --primary-glow: rgba(100, 100, 100, 0.2);"><i class="fa-solid fa-rotate"></i> <span data-i18n="sim.reset">Reset</span></button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <a href="{% url 'lobby' %}" class="btn-premium" style="font-size: 0.7rem;"><i class="fa-solid fa-house"></i> <span data-i18n="sim.lobby">Lobby</span></a>
+                    <a href="{% url 'profile' %}" class="btn-premium" style="font-size: 0.7rem;"><i class="fa-solid fa-user-gear"></i> <span data-i18n="sim.profile">Profile</span></a>
+                </div>
+            </div>
+            
+            <div id="game-messages" class="glass-bright">
                 <div id="messages-content"></div>
             </div>
         </div>
         
         <div id="right-panel">
-            <div id="turn-indicator" class="mobile-order-2">Ожидание оппонента...</div>
-            <div class="mobile-order-3" style="display:flex; justify-content:center;">
+            <div id="turn-indicator">Initialization...</div>
+            <div class="viewport-container">
                 <canvas id="game-canvas" width="540" height="540"></canvas>
             </div>
         </div>
@@ -254,53 +416,55 @@
     
     <div id="modal-container" class="modal-overlay">
        <div class="modal-content" style="width: 480px;">
-           <h3 id="modal-title" style="margin-top:0; color:#4CAF50; border-bottom: 2px solid #333; padding-bottom:10px;">Меню</h3>
-           <div id="modal-body" style="margin-bottom: 20px; max-height: 440px; overflow-y:auto; overflow-x: hidden;">
+           <h3 id="modal-title" style="margin-top:0; color:var(--primary); border-bottom: 1px solid var(--border); padding-bottom:15px; font-family:var(--font-heading); text-transform:uppercase; letter-spacing:2px;" data-i18n="sim.menu">Menu</h3>
+           <div id="modal-body" style="margin-bottom: 25px; max-height: 70vh; overflow-y:auto; overflow-x: hidden;">
            </div>
            <div style="text-align: right;">
-               <button onclick="closeModal()" style="background:#555;"><i class="fa-solid fa-xmark"></i> Закрыть</button>
+               <button onclick="closeModal()" class="btn-premium" style="--primary: #999; padding: 8px 20px;"><i class="fa-solid fa-xmark"></i> <span data-i18n="sim.close">Close</span></button>
            </div>
        </div>
     </div>
 
     <script>
+        console.log("Zeta Core initializing...");
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         const CELL_SIZE = 60;
         const GRID_SIZE = 9;
         
         const COLORS = {
-            grid1: '#2a3b22',
-            grid2: '#354a2b',
-            player: '#2196F3',
-            enemy: '#F44336',
+            grid1: '#1b2a1e',  /* Dark tactical green */
+            grid2: '#243a29',  /* Slightly lighter foliage */
+            gridLine: '#3a5f44', /* Bright grid boundary */
+            player: '#00FF41', /* Matrix Green */
+            enemy: '#FF3D00',
             text: '#ffffff',
-            highlightMove: 'rgba(76, 175, 80, 0.4)',
-            highlightAttack: 'rgba(244, 67, 54, 0.4)',
-            highlightSelect: 'rgba(255, 235, 59, 0.7)'
+            highlightMove: 'rgba(0, 255, 65, 0.3)',
+            highlightAttack: 'rgba(255, 61, 0, 0.3)',
+            highlightSelect: 'rgba(0, 180, 216, 0.5)'
         };
 
         const ranks = [
-            { name: "Рядовой", xp: 0, icon: "1_private.png" },
-            { name: "Ефрейтор", xp: 250, icon: "2_efreytor.png" },
-            { name: "Мл. Сержант", xp: 500, icon: "3_jsergeant.png" },
-            { name: "Сержант", xp: 750, icon: "4_sergeant.png" },
-            { name: "Ст. Сержант", xp: 1000, icon: "5_ssergeant.png" },
-            { name: "Старшина", xp: 1150, icon: "6_starshina.png" },
-            { name: "Прапорщик", xp: 1400, icon: "7_praporshik.png" },
-            { name: "Ст. Прапорщик", xp: 1600, icon: "8_spraporshik.png" },
-            { name: "Мл. Лейтенант", xp: 2000, icon: "9_jleytenant.png" },
-            { name: "Лейтенант", xp: 2250, icon: "10_leytenant.png" },
-            { name: "Ст. Лейтенант", xp: 2500, icon: "11_sleytenant.png" },
-            { name: "Капитан", xp: 3000, icon: "12_captain.png" },
-            { name: "Майор", xp: 3500, icon: "13_major.png" },
-            { name: "Подполковник", xp: 4250, icon: "14_jcolonel.png" },
-            { name: "Полковник", xp: 5000, icon: "15_colonel.png" },
-            { name: "Генерал-Майор", xp: 6000, icon: "16_genmaj.png" },
-            { name: "Генерал-Лейтенант", xp: 7250, icon: "17_genliet.png" },
-            { name: "Генерал-Полковник", xp: 8500, icon: "18_gencol.png" },
-            { name: "Генерал Армии", xp: 9500, icon: "19_genarmy.png" },
-            { name: "Генералиссимус", xp: 12000, icon: "20_generalisimus.png" }
+            { name: "Private", xp: 0, icon: "1_private.png" },
+            { name: "Corporal", xp: 250, icon: "2_efreytor.png" },
+            { name: "Jr. Sergeant", xp: 500, icon: "3_jsergeant.png" },
+            { name: "Sergeant", xp: 750, icon: "4_sergeant.png" },
+            { name: "Sr. Sergeant", xp: 1000, icon: "5_ssergeant.png" },
+            { name: "Master Sgt.", xp: 1150, icon: "6_starshina.png" },
+            { name: "Warrant Off.", xp: 1400, icon: "7_praporshik.png" },
+            { name: "Sr. Warrant", xp: 1600, icon: "8_spraporshik.png" },
+            { name: "Jr. Lieutenant", xp: 2000, icon: "9_jleytenant.png" },
+            { name: "Lieutenant", xp: 2250, icon: "10_leytenant.png" },
+            { name: "Sr. Lieutenant", xp: 2500, icon: "11_sleytenant.png" },
+            { name: "Captain", xp: 3000, icon: "12_captain.png" },
+            { name: "Major", xp: 3500, icon: "13_major.png" },
+            { name: "Lt. Colonel", xp: 4250, icon: "14_jcolonel.png" },
+            { name: "Colonel", xp: 5000, icon: "15_colonel.png" },
+            { name: "Brig. General", xp: 6000, icon: "16_genmaj.png" },
+            { name: "Lt. General", xp: 7250, icon: "17_genliet.png" },
+            { name: "General", xp: 8500, icon: "18_gencol.png" },
+            { name: "Army General", xp: 9500, icon: "19_genarmy.png" },
+            { name: "Generalissimus", xp: 12000, icon: "20_generalisimus.png" }
         ];
 
         const SVG_PATHS = {
@@ -313,42 +477,42 @@
         const buildSvg = (path) => `<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" style="position:relative; top:2px;"><path d="${path}"/></svg>`;
 
         const UNIT_TYPES = {
-            'hq': { name: 'Штаб', cost: 0, hp: 100, dmg: [0,0], move: 0, range: 0, path: SVG_PATHS['hq'], iconHtml: buildSvg(SVG_PATHS['hq']), color: '#555' },
-            'infantry': { name: 'Пехота', cost: 15, hp: 15, dmg: [4, 6], move: 1, range: 1, path: SVG_PATHS['infantry'], iconHtml: buildSvg(SVG_PATHS['infantry']), color: '#2196F3' },
-            'tank': { name: 'Танк', cost: 40, hp: 40, dmg: [8, 12], move: 1, range: 1, path: SVG_PATHS['tank'], iconHtml: buildSvg(SVG_PATHS['tank']), color: '#1976D2' },
-            'artillery': { name: 'Артиллерия', cost: 30, hp: 10, dmg: [5, 8], move: 1, range: 2, path: SVG_PATHS['artillery'], iconHtml: buildSvg(SVG_PATHS['artillery']), color: '#0D47A1' },
-            'air': { name: 'Авиация', cost: 50, hp: 20, dmg: [5, 8], move: 2, range: 1, path: SVG_PATHS['air'], iconHtml: buildSvg(SVG_PATHS['air']), color: '#82B1FF' }
+            'hq': { name: 'HQ', cost: 0, hp: 100, dmg: [0,0], move: 0, range: 0, path: SVG_PATHS['hq'], iconHtml: buildSvg(SVG_PATHS['hq']), color: '#555' },
+            'infantry': { name: 'Infantry', cost: 15, hp: 15, dmg: [4, 6], move: 1, range: 1, path: SVG_PATHS['infantry'], iconHtml: buildSvg(SVG_PATHS['infantry']), color: '#2196F3' },
+            'tank': { name: 'Tank', cost: 40, hp: 40, dmg: [8, 12], move: 1, range: 1, path: SVG_PATHS['tank'], iconHtml: buildSvg(SVG_PATHS['tank']), color: '#1976D2' },
+            'artillery': { name: 'Artillery', cost: 30, hp: 10, dmg: [5, 8], move: 1, range: 2, path: SVG_PATHS['artillery'], iconHtml: buildSvg(SVG_PATHS['artillery']), color: '#0D47A1' },
+            'air': { name: 'Air Force', cost: 50, hp: 20, dmg: [5, 8], move: 2, range: 1, path: SVG_PATHS['air'], iconHtml: buildSvg(SVG_PATHS['air']), color: '#82B1FF' }
         };
 
         const TECH_TREE = {
-            'eco1': { id: 'eco1', name: 'Склады', desc: '+1 Ресурса/сек', cost: 10, req: [], researched: false },
-            'eco2': { id: 'eco2', name: 'Конвои', desc: 'Старт. Ресурсы +50', cost: 25, req: ['eco1'], researched: false },
-            'eco3': { id: 'eco3', name: 'Заводы', desc: '+2 Ресурса/сек', cost: 45, req: ['eco2'], researched: false },
-            'eco4': { id: 'eco4', name: 'ВПК', desc: '+3 Ресурса/сек', cost: 70, req: ['eco3'], researched: false },
+            'eco1': { id: 'eco1', name: 'Warehouses', desc: '+1 Resources/sec', cost: 10, req: [], researched: false },
+            'eco2': { id: 'eco2', name: 'Convoys', desc: 'Starting Resources +50', cost: 25, req: ['eco1'], researched: false },
+            'eco3': { id: 'eco3', name: 'Factories', desc: '+2 Resources/sec', cost: 45, req: ['eco2'], researched: false },
+            'eco4': { id: 'eco4', name: 'MIC', desc: '+3 Resources/sec', cost: 70, req: ['eco3'], researched: false },
             
-            'cap1': { id: 'cap1', name: 'Коммутатор', desc: 'Улучшение 1: +1 Лимит', cost: 20, req: [], researched: false },
-            'cap2': { id: 'cap2', name: 'Радиовышка', desc: 'Улучшение 2: +2 Лимит', cost: 50, req: ['cap1'], researched: false },
-            'cap3': { id: 'cap3', name: 'Спутник', desc: 'Улучшение 3: +3 Лимит', cost: 90, req: ['cap2'], researched: false },
+            'cap1': { id: 'cap1', name: 'Comm Hub', desc: 'Upgrade 1: +1 Unit Cap', cost: 20, req: [], researched: false },
+            'cap2': { id: 'cap2', name: 'Radio Tower', desc: 'Upgrade 2: +2 Unit Cap', cost: 50, req: ['cap1'], researched: false },
+            'cap3': { id: 'cap3', name: 'Satellite', desc: 'Upgrade 3: +3 Unit Cap', cost: 90, req: ['cap2'], researched: false },
             
-            'inf_hp1': { id: 'inf_hp1', name: 'Броня', desc: '+5 HP Пехоте', cost: 15, req: [], researched: false },
-            'inf_dmg1':{ id: 'inf_dmg1', name: 'Снаряжение', desc: 'Урон пехоты +3', cost: 30, req: ['inf_hp1'], researched: false },
-            'inf_hp2': { id: 'inf_hp2', name: 'Экзоскелет', desc: '+10 HP Пехоте', cost: 55, req: ['inf_dmg1'], researched: false },
-            'inf_rng': { id: 'inf_rng', name: 'Оптика', desc: 'Дальность Пехоты +1', cost: 75, req: ['inf_hp2'], researched: false },
+            'inf_hp1': { id: 'inf_hp1', name: 'Armor', desc: '+5 HP Infantry', cost: 15, req: [], researched: false },
+            'inf_dmg1':{ id: 'inf_dmg1', name: 'Gear', desc: 'Infantry DMG +3', cost: 30, req: ['inf_hp1'], researched: false },
+            'inf_hp2': { id: 'inf_hp2', name: 'Exoskeleton', desc: '+10 HP Infantry', cost: 55, req: ['inf_dmg1'], researched: false },
+            'inf_rng': { id: 'inf_rng', name: 'Optics', desc: 'Infantry Range +1', cost: 75, req: ['inf_hp2'], researched: false },
             
-            'tnk_dmg1':{ id: 'tnk_dmg1', name: 'Снаряды', desc: 'Урон Танков +3', cost: 20, req: [], researched: false },
-            'tnk_hp1': { id: 'tnk_hp1', name: 'Броня Т-1', desc: 'HP Танков +15', cost: 35, req: ['tnk_dmg1'], researched: false },
-            'tnk_dmg2':{ id: 'tnk_dmg2', name: 'Плазма', desc: 'Урон Танков +5', cost: 60, req: ['tnk_hp1'], researched: false },
-            'tnk_hp2': { id: 'tnk_hp2', name: 'Траки', desc: 'HP Танков +25', cost: 85, req: ['tnk_dmg2'], researched: false },
+            'tnk_dmg1':{ id: 'tnk_dmg1', name: 'Ammo', desc: 'Tank DMG +3', cost: 20, req: [], researched: false },
+            'tnk_hp1': { id: 'tnk_hp1', name: 'Armor T-1', desc: 'Tank HP +15', cost: 35, req: ['tnk_dmg1'], researched: false },
+            'tnk_dmg2':{ id: 'tnk_dmg2', name: 'Plasma', desc: 'Tank DMG +5', cost: 60, req: ['tnk_hp1'], researched: false },
+            'tnk_hp2': { id: 'tnk_hp2', name: 'Tracks', desc: 'Tank HP +25', cost: 85, req: ['tnk_dmg2'], researched: false },
             
-            'art_dmg1':{ id: 'art_dmg1', name: 'Наведение', desc: 'Урон Арты +5', cost: 25, req: [], researched: false },
-            'art_rng1':{ id: 'art_rng1', name: 'Стволы', desc: 'Дальность Арты +1', cost: 45, req: ['art_dmg1'], researched: false },
-            'art_dmg2':{ id: 'art_dmg2', name: 'Фугас', desc: 'Урон Арты +8', cost: 70, req: ['art_rng1'], researched: false },
-            'art_mgr': { id: 'art_mgr', name: 'Шасси', desc: 'Шаг Арты +1', cost: 95, req: ['art_dmg2'], researched: false },
+            'art_dmg1':{ id: 'art_dmg1', name: 'Guidance', desc: 'Artillery DMG +5', cost: 25, req: [], researched: false },
+            'art_rng1':{ id: 'art_rng1', name: 'Barrels', desc: 'Artillery Range +1', cost: 45, req: ['art_dmg1'], researched: false },
+            'art_dmg2':{ id: 'art_dmg2', name: 'HE Rounds', desc: 'Artillery DMG +8', cost: 70, req: ['art_rng1'], researched: false },
+            'art_mgr': { id: 'art_mgr', name: 'Chassis', desc: 'Artillery Move +1', cost: 95, req: ['art_dmg2'], researched: false },
             
-            'air_dmg1':{ id: 'air_dmg1', name: 'Пулеметы', desc: 'Урон Авиа +4', cost: 30, req: [], researched: false },
-            'air_hp1': { id: 'air_hp1', name: 'Ловушки', desc: 'HP Авиа +10', cost: 50, req: ['air_dmg1'], researched: false },
-            'air_dmg2':{ id: 'air_dmg2', name: 'Ракеты В-З', desc: 'Урон Авиа +7', cost: 80, req: ['air_hp1'], researched: false },
-            'air_rng1':{ id: 'air_rng1', name: 'Форсаж', desc: 'Шаг Авиа +1', cost: 110, req: ['air_dmg2'], researched: false }
+            'air_dmg1':{ id: 'air_dmg1', name: 'Guns', desc: 'Air DMG +4', cost: 30, req: [], researched: false },
+            'air_hp1': { id: 'air_hp1', name: 'Flares', desc: 'Air HP +10', cost: 50, req: ['air_dmg1'], researched: false },
+            'air_dmg2':{ id: 'air_dmg2', name: 'A-G Missiles', desc: 'Air DMG +7', cost: 80, req: ['air_hp1'], researched: false },
+            'air_rng1':{ id: 'air_rng1', name: 'Afterburner', desc: 'Air Move +1', cost: 110, req: ['air_dmg2'], researched: false }
         };
 
         // Anti-cheat v1: Protected internal state
@@ -385,42 +549,62 @@
             const researchBtn = document.getElementById('research-btn');
             const endTurnBtn = document.getElementById('end-turn-btn');
 
-            if (GAME_MODE !== 'multiplayer') { ind.style.display = 'none'; return; }
-            ind.style.display = 'block';
+            if (GAME_MODE !== 'multiplayer') { 
+                if(ind) {
+                    ind.style.display = 'block'; 
+                    ind.innerHTML = '<i class="fa-solid fa-crosshairs"></i> ' + t('sim.tactical_mode');
+                    ind.className = '';
+                }
+                return; 
+            }
             
             if (isMyTurnMp) {
-                ind.className = '';
-                ind.innerHTML = '<i class="fa-solid fa-check"></i> Ваш ход!';
+                if(ind) {
+                    ind.className = '';
+                    ind.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('sim.your_turn');
+                }
                 if(hireBtn) hireBtn.disabled = false;
                 if(researchBtn) researchBtn.disabled = false;
                 if(endTurnBtn) endTurnBtn.disabled = false;
             } else {
-                ind.className = 'enemy-turn';
-                ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> Сейчас ходит соперник...';
+                if(ind) {
+                    ind.className = 'enemy-turn';
+                    ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> ' + t('sim.opponent_turn');
+                }
                 if(hireBtn) hireBtn.disabled = true;
                 if(researchBtn) researchBtn.disabled = true;
                 if(endTurnBtn) endTurnBtn.disabled = true;
             }
         }
 
-        document.getElementById('new-battle-btn').addEventListener('click', startBattle);
-        document.getElementById('end-turn-btn').addEventListener('click', () => {
-            if (gameState !== 'playing' || turn !== 'player') return;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event Listeners for new UI
+            document.getElementById('hire-btn')?.addEventListener('click', () => openModal('hire'));
+            document.getElementById('research-btn')?.addEventListener('click', () => openModal('research'));
+            document.getElementById('new-battle-btn')?.addEventListener('click', startBattle);
+            document.getElementById('end-turn-btn')?.addEventListener('click', () => {
+                if (gameState !== 'playing' || turn !== 'player') return;
 
-            logMessage("Вы завершили ход.", 'msg-sys');
-            selectedUnit = null;
-            draw();
+                logMessage(t('sim.turn_ended'), 'msg-sys');
+                selectedUnit = null;
+                draw();
 
-            if (GAME_MODE === 'multiplayer') {
-                turn = 'wait';
-                isMyTurnMp = false;
-                _turnEndSentAt = Date.now();
-                updateTurnIndicator();
-                mpSendState(false);
-            } else {
-                turn = 'ai';
-                setTimeout(aiTurn, 500);
-            }
+                if (GAME_MODE === 'multiplayer') {
+                    turn = 'wait';
+                    isMyTurnMp = false;
+                    _turnEndSentAt = Date.now();
+                    updateTurnIndicator();
+                    mpSendState(true);
+                } else {
+                    turn = 'ai';
+                    setTimeout(aiTurn, 500);
+                }
+            });
+            
+            loadGame();
+            updateUI(); 
+            startBattle();
+            document.fonts.ready.then(() => { draw(); });
         });
 
         function getPlayerMaxUnits() {
@@ -446,22 +630,20 @@
                     playerGold += baseIncome;
                     _ZETA.g = playerGold;
                 }
-                    let aiIncome = 4;
-                    if (currentRankIdx >= 2) aiIncome += 2;
-                    if (currentRankIdx >= 5) aiIncome += 2;
-                    if (currentRankIdx >= 10) aiIncome += 3;
-                    if (currentRankIdx >= 14) aiIncome += 3;
-                    aiGold += aiIncome; 
-                }
+                
+                // AI income (calculated but only relevant if not MP)
+                let aiIncome = 4;
+                if (currentRankIdx >= 2) aiIncome += 2;
+                if (currentRankIdx >= 5) aiIncome += 2;
+                if (currentRankIdx >= 10) aiIncome += 3;
+                if (currentRankIdx >= 14) aiIncome += 3;
+                aiGold += aiIncome; 
+
                 updateUI();
             }
         }, 1000);
 
-        loadGame();
-        document.fonts.ready.then(() => { updateUI(); startBattle(); });
-
-        setInterval(() => { if (gameState === 'playing') saveGame(); }, 30000);
-        window.addEventListener('beforeunload', () => { if (gameState === 'playing') saveGame(); });
+        // Removed loosely attached calls - now handled in DOMContentLoaded
 
         function logMessage(text, colorClass = '') {
             const mc = document.getElementById('messages-content');
@@ -524,7 +706,7 @@
         }
 
         function updateUI() {
-            let nextRankXpText = 'МАКС';
+            let nextRankXpText = t('sim.max');
             let progressPercent = 100;
             if (currentRankIdx < ranks.length - 1) {
                 let currentRankXp = ranks[currentRankIdx].xp;
@@ -536,9 +718,8 @@
             }
             let xpBarFill = document.getElementById('xp-bar-fill');
             if(xpBarFill) xpBarFill.style.width = progressPercent + '%';
-            if(document.getElementById('player-rank')) document.getElementById('player-rank').textContent = ranks[currentRankIdx].name;
+            if(document.getElementById('player-rank')) document.getElementById('player-rank').textContent = t('rank.' + currentRankIdx);
             let iconEl = document.getElementById('player-rank-icon');
-            // пахю
             if (iconEl && ranks[currentRankIdx].icon) iconEl.src = '/static/rank_icons/' + ranks[currentRankIdx].icon;
             if(document.getElementById('player-xp')) document.getElementById('player-xp').textContent = playerXp;
             if(document.getElementById('next-rank-xp')) document.getElementById('next-rank-xp').textContent = nextRankXpText;
@@ -558,7 +739,7 @@
                 leveledUp = true;
             }
             // пахуи
-            if (leveledUp) logMessage(`Новое звание: ${ranks[currentRankIdx].name}!`, 'msg-sys');
+            if (leveledUp) logMessage(`${t('sim.new_rank')} ${t('rank.' + currentRankIdx)}!`, 'msg-sys');
             _ZETA.x = playerXp;
             _ZETA.r = currentRankIdx;
             updateUI();
@@ -664,7 +845,7 @@
 
             selectedUnit = null;
             document.getElementById('messages-content').innerHTML = '';
-            logMessage("Битва началась!", 'msg-sys');
+            logMessage(t('sim.battle_started'), 'msg-sys');
             updateUI();
             draw();
         }
@@ -680,34 +861,35 @@
             
             if (type === 'hire') {
                 contentContainer.classList.remove('wide');
-                title.innerHTML = '<i class="fa-solid fa-person-military-rifle"></i> Найм Юнитов';
+                title.innerHTML = '<i class="fa-solid fa-person-military-rifle"></i> ' + t('sim.hire_title');
                 let cur = getCurrentUnitCap('player');
                 let max = getPlayerMaxUnits();
                 
-                ['infantry', 'tank', 'artillery', 'air'].forEach(t => {
-                    const data = UNIT_TYPES[t];
-                    const stats = getUnitStats(t, 'player');
+                ['infantry', 'tank', 'artillery', 'air'].forEach(uKey => {
+                    const data = UNIT_TYPES[uKey];
+                    const stats = getUnitStats(uKey, 'player');
                     const canAfford = playerGold >= data.cost;
+                    const unitName = t('unit.' + (uKey === 'air' ? 'air' : uKey));
                     
                     const div = document.createElement('div');
                     div.className = 'modal-list-item';
                     div.innerHTML = `
                         <div class="icon-circle" style="background:#222; color:${data.color};">${data.iconHtml}</div>
-                        <div style="flex-grow:1; margin-left: 10px;"><b>${data.name}</b><br><small style="color:#aaa;">Урон: ${stats.dmg.join('-')} | HP: ${stats.maxHp}</small></div>
-                        <button class="btn-hire" ${!canAfford || cur >= max ? 'disabled' : ''} onclick="buyUnit('${t}')">Нанять <span style="font-size:0.85em; color:var(--primary);"><i class="fa-solid fa-cubes"></i> ${data.cost}</span></button>
+                        <div style="flex-grow:1; margin-left: 10px;"><b>${unitName}</b><br><small style="color:#aaa;">${t('sim.dmg')}: ${stats.dmg.join('-')} | HP: ${stats.maxHp}</small></div>
+                        <button class="btn-hire" ${!canAfford || cur >= max ? 'disabled' : ''} onclick="buyUnit('${uKey}')">${t('sim.recruit')} <span style="font-size:0.85em; color:var(--primary);"><i class="fa-solid fa-cubes"></i> ${data.cost}</span></button>
                     `;
                     body.appendChild(div);
                 });
             } else if (type === 'tech' || type === 'research') {
                 contentContainer.classList.add('wide');
-                title.innerHTML = '<i class="fa-solid fa-microchip"></i> Инженерия (Древо Технологий)';
+                title.innerHTML = '<i class="fa-solid fa-microchip"></i> ' + t('sim.tech_title');
                 const COLS = [
-                    { id: 'gold', title: '<i class="fa-solid fa-cubes"></i> Снабжение', nodes: ['eco1', 'eco2', 'eco3', 'eco4'] },
-                    { id: 'command', title: '<i class="fa-solid fa-building-circle-arrow-right"></i> Структура', nodes: ['cap1', 'cap2', 'cap3'] },
-                    { id: 'infantry', title: '<i class="fa-solid fa-person-rifle"></i> Пехота', nodes: ['inf_hp1', 'inf_dmg1', 'inf_hp2', 'inf_rng'] },
-                    { id: 'tanks', title: '<div style="display:inline-block; width:22px; vertical-align:middle; position:relative; top:-2px; color:inherit;">' + UNIT_TYPES['tank'].iconHtml + '</div> Танки', nodes: ['tnk_dmg1', 'tnk_hp1', 'tnk_dmg2', 'tnk_hp2'] },
-                    { id: 'artillery', title: '<i class="fa-solid fa-crosshairs"></i> Артиллерия', nodes: ['art_dmg1', 'art_rng1', 'art_dmg2', 'art_mgr'] },
-                    { id: 'air', title: '<i class="fa-solid fa-plane-up"></i> Авиация', nodes: ['air_dmg1', 'air_hp1', 'air_dmg2', 'air_rng1'] }
+                    { id: 'gold', title: '<i class="fa-solid fa-cubes"></i> ' + t('tech.col.supply'), nodes: ['eco1', 'eco2', 'eco3', 'eco4'] },
+                    { id: 'command', title: '<i class="fa-solid fa-building-circle-arrow-right"></i> ' + t('tech.col.structure'), nodes: ['cap1', 'cap2', 'cap3'] },
+                    { id: 'infantry', title: '<i class="fa-solid fa-person-rifle"></i> ' + t('tech.col.infantry'), nodes: ['inf_hp1', 'inf_dmg1', 'inf_hp2', 'inf_rng'] },
+                    { id: 'tanks', title: '<div style="display:inline-block; width:22px; vertical-align:middle; position:relative; top:-2px; color:inherit;">' + UNIT_TYPES['tank'].iconHtml + '</div> ' + t('tech.col.tanks'), nodes: ['tnk_dmg1', 'tnk_hp1', 'tnk_dmg2', 'tnk_hp2'] },
+                    { id: 'artillery', title: '<i class="fa-solid fa-crosshairs"></i> ' + t('tech.col.artillery'), nodes: ['art_dmg1', 'art_rng1', 'art_dmg2', 'art_mgr'] },
+                    { id: 'air', title: '<i class="fa-solid fa-plane-up"></i> ' + t('tech.col.air'), nodes: ['air_dmg1', 'air_hp1', 'air_dmg2', 'air_rng1'] }
                 ];
                 
                 let html = '<div class="tech-tree-container">';
@@ -721,8 +903,8 @@
                         
                         html += `
                             <div class="tech-node ${stateClass}" onclick="buyTech('${nodeId}')">
-                                <div style="font-weight:bold; font-size:1.05rem; margin-bottom:5px;">${tech.name}</div>
-                                <div style="font-size:0.75rem; color:#aaa; margin-bottom:8px;">${tech.desc}</div>
+                                <div style="font-weight:bold; font-size:1.05rem; margin-bottom:5px;">${t('tech.' + nodeId)}</div>
+                                <div style="font-size:0.75rem; color:#aaa; margin-bottom:8px;">${t('tech.' + nodeId + '.d')}</div>
                                 <div style="color:#ffeb3b; font-weight:bold; font-size:0.9rem;"><i class="fa-solid fa-flask"></i> ${tech.cost}</div>
                             </div>
                         `;
@@ -739,15 +921,15 @@
             document.getElementById('modal-container').style.display = 'none';
         }
 
-        window.buyUnit = function(t) {
+        window.buyUnit = function(uType) {
             if (turn !== 'player' || gameState !== 'playing') {
-                logMessage("Вы не можете нанимать войска во время чужого хода!", "msg-dmg");
+                logMessage(window.t('sim.no_recruit_enemy_turn'), "msg-dmg");
                 if(window.playErrorSound) window.playErrorSound();
                 return;
             }
-            let cost = UNIT_TYPES[t].cost;
+            let cost = UNIT_TYPES[uType].cost;
             if (playerGold >= cost && getCurrentUnitCap('player') < getPlayerMaxUnits()) {
-                if (spawnUnit('player', t)) {
+                if (spawnUnit('player', uType)) {
                     playerGold -= cost;
                     _ZETA.g = playerGold;
                     updateUI();
@@ -761,7 +943,7 @@
 
         window.buyTech = function(id) {
             if (turn !== 'player' || gameState !== 'playing') {
-                logMessage("Инженерия доступна только в ваш ход!", "msg-dmg");
+                logMessage(t('sim.no_tech_enemy_turn'), "msg-dmg");
                 if(window.playErrorSound) window.playErrorSound();
                 return;
             }
@@ -837,7 +1019,7 @@
                     let u = units[i];
                     if (u.type === 'enemy') {
                         sessionKillsToSave++;
-                        logMessage(`Вражеский ${UNIT_TYPES[u.uClass].name} уничтожен!`, 'msg-dmg');
+                        logMessage(`${t('unit.' + (u.uClass === 'air' ? 'air' : u.uClass))} ${t('sim.enemy_destroyed')}`, 'msg-dmg');
                         if (u.uClass !== 'hq') {
                             let bulbs = Math.floor(Math.random() * 3) + 1;
                             lightbulbs += bulbs;
@@ -846,7 +1028,7 @@
                             else addXp(5);
                         }
                     } else {
-                        logMessage(`Ваш ${UNIT_TYPES[u.uClass].name} пал в бою!`, 'msg-dmg');
+                        logMessage(`${t('unit.' + (u.uClass === 'air' ? 'air' : u.uClass))} ${t('sim.unit_fallen')}`, 'msg-dmg');
                     }
                     if (u === selectedUnit) selectedUnit = null;
                     if(window.playDeathSound) window.playDeathSound();
@@ -858,21 +1040,21 @@
             let e_hq = units.filter(u => u.type === 'enemy' && u.uClass === 'hq');
             if (p_hq.length === 0) {
                 gameState = 'lost'; 
-                logMessage("Поражение! Ваш Штаб пал.", 'msg-dmg'); 
+                logMessage(t('sim.defeat_hq'), 'msg-dmg'); 
                 saveGame(true, false); 
                 draw(); 
                 if (GAME_MODE === 'multiplayer') mpSendState(true);
-                setTimeout(() => alert("Поражение"), 100); 
+                setTimeout(() => alert(t('sim.defeat')), 100); 
                 return true;
             }
             if (e_hq.length === 0) {
                 gameState = 'won'; 
-                logMessage("Победа! Вражеский Штаб уничтожен.", 'msg-heal'); 
+                logMessage(t('sim.victory_hq'), 'msg-heal'); 
                 addXp(100); 
                 saveGame(true, true); 
                 draw(); 
                 if (GAME_MODE === 'multiplayer') mpSendState(true);
-                setTimeout(() => alert("Победа!"), 100);
+                setTimeout(() => alert(t('sim.victory')), 100);
                 return true;
             }
             updateUI();
@@ -931,7 +1113,7 @@
                 if (minDist <= enemy.attackRange) {
                     let dmg = Math.floor(Math.random()*(enemy.damage[1]-enemy.damage[0]+1)) + enemy.damage[0];
                     closest.hp -= dmg;
-                    logMessage(`Вражеский ${UNIT_TYPES[enemy.uClass].name} нанес вам ${dmg} ед. урона!`, 'msg-dmg');
+                    logMessage(`${t('unit.' + (enemy.uClass === 'air' ? 'air' : enemy.uClass))} ${t('sim.enemy_dealt')} ${dmg} ${t('sim.damage')}`, 'msg-dmg');
                 } else {
                     let bestX = enemy.x; let bestY = enemy.y; let bestDist = minDist;
                     let mr = enemy.moveRange;
@@ -954,7 +1136,7 @@
                     if (newDist <= enemy.attackRange) {
                         let dmg = Math.floor(Math.random()*(enemy.damage[1]-enemy.damage[0]+1)) + enemy.damage[0];
                         closest.hp -= dmg;
-                        logMessage(`Вражеский ${UNIT_TYPES[enemy.uClass].name} подошел и атаковал! (-${dmg} HP)`, 'msg-dmg');
+                        logMessage(`${t('unit.' + (enemy.uClass === 'air' ? 'air' : enemy.uClass))} ${t('sim.advanced_attacked')} (-${dmg} HP)`, 'msg-dmg');
                     }
                 }
             });
@@ -963,7 +1145,7 @@
             if (gameState === 'playing') {
                 turn = 'player';
                 units.forEach(u => { u.hasMoved = false; u.hasAttacked = false; });
-                logMessage("Ваш ход! Можете управлять всеми войсками.", 'msg-sys');
+                logMessage(t('sim.all_units_ready'), 'msg-sys');
                 selectedUnit = null;
                 draw();
             }
@@ -1008,7 +1190,7 @@
                         if (data.room_status === 'waiting' && GAME_ROLE === 'host') {
                             let ind = document.getElementById('turn-indicator');
                             ind.className = 'enemy-turn';
-                            ind.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Ожидание подключения второго Командира...';
+                            ind.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> ' + t('sim.waiting_commander');
                             return;
                         } else if (data.current_turn !== GAME_ROLE) {
                             if (isMyTurnMp) { // Если в коде еще "мой ход", а сервер говорит "чужой"
@@ -1018,7 +1200,7 @@
                             }
                             let ind = document.getElementById('turn-indicator');
                             ind.className = 'enemy-turn';
-                            ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> Сейчас ходит соперник...';
+                            ind.innerHTML = '<i class="fa-solid fa-hourglass-half fa-spin"></i> ' + t('sim.opponent_turn');
                         }
                         
                         if (data.room_status === 'finished') {
@@ -1035,7 +1217,7 @@
                             if (!_gameOverProcessed && !checkDeaths()) {
                                 _gameOverProcessed = true;
                                 gameState = 'finished';
-                                alert("Матч завершен!");
+                                alert(t('sim.match_finished'));
                             }
                             return;
                         }
@@ -1057,7 +1239,7 @@
                             units.forEach(u => { if (u.type === 'player') { u.hasMoved=false; u.hasAttacked=false; }});
                             
                             updateUI();
-                            logMessage("Ваш ход!", 'msg-sys');
+                            logMessage(t('sim.your_turn'), 'msg-sys');
                             draw();
                             if (!_gameOverProcessed) checkDeaths();
                         }
@@ -1067,11 +1249,19 @@
         }
 
         function draw() {
+            if (!ctx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid squares
             for(let y=0; y<GRID_SIZE; y++) {
                 for(let x=0; x<GRID_SIZE; x++) {
                     ctx.fillStyle = (x+y)%2===0 ? COLORS.grid1 : COLORS.grid2;
                     ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    
+                    // Add subtle tactical grid lines
+                    ctx.strokeStyle = COLORS.gridLine;
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 }
             }
             
@@ -1140,10 +1330,11 @@
             });
 
             if (gameState === 'won') {
-                drawTextOverlay("ПОБЕДА", "#00FF00");
+                drawTextOverlay(t('sim.victory_overlay'), "#00FF00");
             } else if (gameState === 'lost') {
-                drawTextOverlay("ПОРАЖЕНИЕ", "#f44336");
+                drawTextOverlay(t('sim.defeat_overlay'), "#f44336");
             }
+            console.log("Draw cycle complete. Units:", units.length);
         }
 
         function drawTextOverlay(text, color) {
@@ -1160,7 +1351,16 @@
             ctx.fillText(text, canvas.width/2, canvas.height/2);
             ctx.shadowColor = "transparent";
         }
+        // Re-render all text when language changes
+        window.addEventListener('zeta-lang-change', () => {
+            updateUI();
+            updateTurnIndicator();
+            // Re-translate static button labels
+            const lblProg = document.getElementById('lbl-level-progression');
+            if (lblProg) lblProg.textContent = zetaGetLang() === 'ru' ? 'ПРОГРЕСС УРОВНЯ' : 'LEVEL PROGRESSION';
+        });
     </script>
     {% include 'game/audio.html' %}
+    <script src="{% static 'js/i18n.js' %}?v=1.0.7"></script>
 </body>
 </html>

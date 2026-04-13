@@ -1,27 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     {% load static %}
     <title>Zeta Project - Strategy</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}?v=1.0.6">
     <style>
-        :root {
-            --bg: #0a0b0a;
-            --surface: rgba(19, 20, 24, 0.75);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #00B4D8;
-            --text: #e4e2e0;
-        }
-
         body {
             margin: 0;
             padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Space Grotesk', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -145,7 +135,6 @@
         .btn-play:hover i {
             color: #ffffff;
         }
-
     </style>
 </head>
 <body>
@@ -156,22 +145,23 @@
             <h1>Zeta Project</h1>
         </div>
         
-        <p class="subtitle">
-            Добро пожаловать в веб-РТС нового поколения.<br>
-            Докажите свои навыки полководца в сложных тактических сражениях с искусственным интеллектом.
+        <p class="subtitle" data-i18n="index.subtitle">
+            Welcome to the next-gen web RTS.<br>
+            Prove your tactical command skills in challenging battles against AI.
         </p>
 
         <a href="{% url 'play' %}" class="btn btn-play">
-            <i class="fa-solid fa-play"></i> ИГРАТЬ
+            <i class="fa-solid fa-play"></i> <span data-i18n="index.play">PLAY NOW</span>
         </a>
         <a href="{% url 'login' %}" class="btn">
-            <i class="fa-solid fa-fingerprint"></i> Войти в систему
+            <i class="fa-solid fa-fingerprint"></i> <span data-i18n="index.signin">Sign In</span>
         </a>
         <a href="{% url 'register' %}" class="btn">
-            <i class="fa-solid fa-id-card"></i> Регистрация
+            <i class="fa-solid fa-id-card"></i> <span data-i18n="index.register">Register</span>
         </a>
     </div>
 
     {% include 'game/audio.html' %}
+    <script src="{% static 'js/i18n.js' %}?v=1.0.6"></script>
 </body>
 </html>

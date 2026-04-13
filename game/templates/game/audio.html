@@ -2,8 +2,8 @@
     // Audio Engine for Zeta Project (Web Audio API)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let audioEnabled = false;
+    let lastHoverTime = 0;
 
-    // Включаем звук по ЛЮБОМУ активному действию, включая mousedown (который реагирует быстрее click)
     const initAudio = () => {
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
@@ -34,6 +34,9 @@
     }
 
     function playHover() {
+        const now = Date.now();
+        if (now - lastHoverTime < 120) return;
+        lastHoverTime = now;
         playTone(600, 'sine', 0.1, 0.02);
     }
 
@@ -68,9 +71,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const attachAudioToButtons = () => {
-            const buttons = document.querySelectorAll('button, .btn, .btn-link');
+            const buttons = document.querySelectorAll('button, .btn-premium, .btn-primary-action');
             buttons.forEach(btn => {
-                // Prevent duplicate listeners if DOM mutations happen
                 if(!btn.dataset.audioAttached) {
                     btn.addEventListener('mouseenter', playHover);
                     btn.addEventListener('mousedown', playClick);
@@ -81,7 +83,6 @@
         
         attachAudioToButtons();
         
-        // Expose function globally in case of dynamic DOM load
         window.attachAudioToButtons = attachAudioToButtons;
         window.playErrorSound = playError;
         window.playStartSound = playStart;
