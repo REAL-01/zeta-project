@@ -130,6 +130,13 @@ body {
     left: 100%;
 }
 
+.btn-premium::after {
+    content: '';
+    position: absolute;
+    top: -5px; bottom: -5px; left: -5px; right: -5px;
+    z-index: -1;
+}
+
 .btn-premium:hover {
     background: rgba(0, 180, 216, 0.2);
     box-shadow: 0 0 20px var(--primary-glow);

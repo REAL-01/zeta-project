@@ -52,6 +52,14 @@
             color: #ffffff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
             border: 1px solid rgba(0, 180, 216, 0.3);
+            position: relative;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -5px; bottom: -5px; left: -5px; right: -5px;
+            z-index: -1;
         }
 
         .btn:hover {
@@ -59,6 +67,7 @@
             color: #ffffff;
             box-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
             border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
         table {
@@ -144,7 +153,7 @@
                         0%
                     {% endif %}
                 </td>
-                <td style="color:#ffd700;"><i class="fa-solid fa-coins"></i> {{ p.playerGold }}</td>
+                <td style="color:#ffd700;"><i class="fa-solid fa-cubes"></i> {{ p.playerGold }}</td>
             </tr>
             {% empty %}
             <tr><td colspan="6" style="text-align:center;">Нет данных о командирах</td></tr>

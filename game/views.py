@@ -1,6 +1,9 @@
 import json
 import time
 import uuid
+import hmac
+import hashlib
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -12,8 +15,23 @@ VALID_TECHS = {'eco1','eco2','eco3','eco4','cap1','cap2','cap3','inf_hp1','inf_d
 def index_view(request):
     return render(request, 'game/index.html')
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 def register_view(request):
     if request.method == 'POST':
+        client_ip = get_client_ip(request)
+        cache_key = f'register_limit_{client_ip}'
+        reg_count = cache.get(cache_key, 0)
+        
+        if reg_count >= 2:
+            return render(request, 'game/register.html', {'error': 'Превышен лимит регистраций с вашего IP (макс 2 в час).'})
+
         username = request.POST.get('username')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
@@ -27,6 +45,7 @@ def register_view(request):
                 return render(request, 'game/register.html', {'error': 'Позывной уже занят'})
             
             user = Player.objects.create_user(username=username, password=password, role='user')
+            cache.set(cache_key, reg_count + 1, 3600) # 1 hour cooldown
             login(request, user)
             return redirect('lobby')
     return render(request, 'game/register.html')
@@ -54,6 +73,11 @@ def play_view(request):
     mode = request.GET.get('mode', 'single')
     room_id = request.GET.get('room')
     
+    # Anti-cheat: Save match start info in session
+    match_id = str(uuid.uuid4())
+    request.session['match_id'] = match_id
+    request.session['match_start_time'] = time.time()
+    
     if request.user.is_authenticated:
         role = 'single'
         if mode == 'multiplayer':
@@ -68,10 +92,7 @@ def play_view(request):
             except MultiplayerRoom.DoesNotExist:
                 return redirect('lobby')
 
-        # Anti-cheat: Save match start info in session
-        match_id = str(uuid.uuid4())
-        request.session['match_id'] = match_id
-        request.session['match_start_time'] = time.time()
+        # Match ID is handled at the start of the view
 
         context = {
             'is_guest': False,
@@ -85,8 +106,8 @@ def play_view(request):
             'room_id': room_id,
             'role': role,
             'match_id': match_id,
-            'v_proj': '0.0.4',
-            'v_anticheat': '1.0.3'
+            'v_proj': '0.0.41',
+            'v_anticheat': '2.0.0'
         }
         return render(request, 'game/simulator.html', context)
     else:
@@ -105,8 +126,9 @@ def play_view(request):
             'mode': 'single',
             'room_id': None,
             'role': 'single',
-            'v_proj': '0.0.4',
-            'v_anticheat': '1.0.3'
+            'match_id': match_id,
+            'v_proj': '0.0.41',
+            'v_anticheat': '2.0.0'
         }
         return render(request, 'game/simulator.html', context)
 
@@ -194,12 +216,23 @@ def leaderboard_view(request):
 def api_save_game(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            raw_body = request.body
+            data = json.loads(raw_body)
             if request.user.is_authenticated:
+                server_match_id = request.session.get('match_id')
+                
+                # ZAC v1.1.0: Signature Verification
+                client_sig = request.headers.get('X-ZAC-Signature')
+                if not client_sig or not server_match_id:
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Missing secure context'}, status=400)
+                
+                expected_sig = hmac.new(server_match_id.encode(), raw_body, hashlib.sha256).hexdigest()
+                if not hmac.compare_digest(client_sig, expected_sig):
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Payload tampering detected'}, status=400)
+
                 # Anti-cheat 1.0.3: Session-based duration check
                 start_time = request.session.get('match_start_time', 0)
                 client_match_id = data.get('match_id')
-                server_match_id = request.session.get('match_id')
                 last_save = request.session.get('last_save_time', 0)
                 
                 # Cooldown 2 mins
@@ -295,9 +328,19 @@ def lobby_view(request):
 def api_mp_create(request):
     from .models import MultiplayerRoom
     if request.method == 'POST':
+        client_ip = get_client_ip(request)
+        cooldown_key = f'room_create_cd_{client_ip}'
+        if cache.get(cooldown_key):
+            return redirect('lobby') # Fast cooldown block
+        
+        active_rooms = MultiplayerRoom.objects.filter(host=request.user, status__in=['waiting', 'playing']).count()
+        if active_rooms >= 2:
+            return redirect('lobby') # Max 2 concurrent rooms per account
+
         MultiplayerRoom.objects.filter(host=request.user, status='waiting').delete()
         host_gold = 100 if 'eco2' in request.user.researchedTechs else 50
         room = MultiplayerRoom.objects.create(host=request.user, status='waiting', host_gold_server=host_gold)
+        cache.set(cooldown_key, True, 15) # 15 second global creation cooldown per IP
         return redirect(f'/play/?mode=multiplayer&room={room.id}')
     return redirect('lobby')
 
@@ -349,7 +392,17 @@ def api_mp_sync(request, room_id):
             })
             
         elif request.method == 'POST':
-            data = json.loads(request.body)
+            raw_body = request.body
+            data = json.loads(raw_body)
+            
+            server_match_id = request.session.get('match_id')
+            client_sig = request.headers.get('X-ZAC-Signature')
+            
+            # ZAC v1.1.0: Signature Verification for MP Sync
+            if server_match_id and client_sig:
+                expected_sig = hmac.new(server_match_id.encode(), raw_body, hashlib.sha256).hexdigest()
+                if not hmac.compare_digest(client_sig, expected_sig):
+                    return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Payload tampering detected'}, status=400)
             
             # Allow initial state push from host even when it's host's turn
             is_initial = data.get('initial', False)

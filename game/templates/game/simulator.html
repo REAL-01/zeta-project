@@ -398,8 +398,8 @@
                     <div class="stat-value" id="lightbulbs-cnt">0</div>
                 </div>
                 <div class="stat-item" style="color: var(--primary)">
-                    <i class="fa-solid fa-coins"></i>
-                    <div class="stat-label">Gold</div>
+                    <i class="fa-solid fa-cubes"></i>
+                    <div class="stat-label" data-i18n="sim.resources">Resources</div>
                     <div class="stat-value" id="gold-cnt">0</div>
                 </div>
             </div>
@@ -446,6 +446,21 @@
 
     <script>
         console.log("Zeta Core initializing...");
+        
+        async function getZacSignature(rawData) {
+            const secret = "{{ match_id }}";
+            const encoder = new TextEncoder();
+            const keyData = encoder.encode(secret);
+            const msgData = encoder.encode(rawData);
+            
+            const key = await crypto.subtle.importKey(
+                'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+            );
+            const signatureBuffer = await crypto.subtle.sign('HMAC', key, msgData);
+            const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+            return signatureArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         const CELL_SIZE = 60;
@@ -676,7 +691,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function saveGame(ended = false, won = false) {
+        async function saveGame(ended = false, won = false) {
             const data = { 
                 xp: playerXp, 
                 rankIdx: currentRankIdx, 
@@ -689,14 +704,18 @@
                 match_id: "{{ match_id }}"
             };
             sessionKillsToSave = 0;
+            const reqBody = JSON.stringify(data);
+            const sig = await getZacSignature(reqBody);
+            
             fetch('/api/save/', {
                 method: 'POST',
                 keepalive: true,
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-ZAC-Signature': sig
                 },
-                body: JSON.stringify(data)
+                body: reqBody
             });
         }
 
@@ -1192,10 +1211,13 @@
             };
 
             try {
+                const reqBody = JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished, initial: initial });
+                const sig = await getZacSignature(reqBody);
+                
                 const resp = await fetch(`/api/mp/sync/${ROOM_ID}/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                    body: JSON.stringify({ game_data: JSON.stringify(sendingData), finished: finished, initial: initial })
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}', 'X-ZAC-Signature': sig },
+                    body: reqBody
                 });
                 const result = await resp.json();
                 if (result.game_version !== undefined) {
