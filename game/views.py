@@ -360,6 +360,8 @@ def api_mp_join(request, room_id):
             room.guest_gold_server = guest_gold
             room.status = 'playing'
             room.save()
+            from .engine import init_room_state
+            init_room_state(room)
             request.session['role'] = 'guest'
             return redirect(f'/play/?mode=multiplayer&room={room.id}')
         except MultiplayerRoom.DoesNotExist:
@@ -380,6 +382,8 @@ def api_mp_sync(request, room_id):
         role = 'host' if is_host else 'guest'
 
         if request.method == 'GET':
+            from .engine import process_action
+            process_action(room, role, {"action": "sync"})
             room.save(update_fields=['updated_at'])
 
             return JsonResponse({
@@ -388,7 +392,9 @@ def api_mp_sync(request, room_id):
                 'current_turn': room.current_turn,
                 'game_data': room.game_data,
                 'game_version': room.game_version,
-                'guest_joined': room.guest is not None
+                'guest_joined': room.guest is not None,
+                'your_gold': int(room.host_gold_server) if is_host else int(room.guest_gold_server),
+                'enemy_gold': int(room.guest_gold_server) if is_host else int(room.host_gold_server)
             })
             
         elif request.method == 'POST':
@@ -398,48 +404,22 @@ def api_mp_sync(request, room_id):
             server_match_id = request.session.get('match_id')
             client_sig = request.headers.get('X-ZAC-Signature')
             
-            # ZAC v1.1.0: Signature Verification for MP Sync
+            # ZAC v2: Signature Verification for actions
             if server_match_id and client_sig:
                 expected_sig = hmac.new(server_match_id.encode(), raw_body, hashlib.sha256).hexdigest()
                 if not hmac.compare_digest(client_sig, expected_sig):
                     return JsonResponse({'status': 'error', 'message': 'Anti-cheat: Payload tampering detected'}, status=400)
             
-            # Allow initial state push from host even when it's host's turn
-            is_initial = data.get('initial', False)
+            action = data.get('action')
+            if not action:
+                return JsonResponse({'status': 'error', 'message': 'No action provided'}, status=400)
             
-            if not is_initial and room.current_turn != role:
-                return JsonResponse({'status': 'error', 'message': 'Not your turn'}, status=400)
+            from .engine import process_action
+            success, err_msg = process_action(room, role, data)
+            
+            if not success:
+                return JsonResponse({'status': 'error', 'message': err_msg}, status=400)
                 
-            new_game_data_raw = data.get('game_data', '{}')
-            new_game_data = json.loads(new_game_data_raw)
-            
-            # --- Anti-Cheat v2: Simplified validation ---
-            # Only validate unit cap (gold validation removed - too many false positives)
-            client_units = new_game_data.get('units', [])
-            # In the sent data, the sender's units are labeled 'enemy' (mirrored for opponent)
-            client_sender_units_count = len([u for u in client_units if u.get('type') == 'enemy'])
-            
-            if client_sender_units_count > 12:
-                return JsonResponse({'status': 'error', 'message': 'Anti-cheat trigger: unit cap exceeded'}, status=400)
-
-            if role == 'host':
-                room.host_units_count = client_sender_units_count
-            else:
-                room.guest_units_count = client_sender_units_count
-            
-            # --- End Anti-Cheat ---
-
-            room.game_data = new_game_data_raw
-            room.game_version += 1
-            
-            # Don't switch turn on initial state push
-            if not is_initial:
-                room.current_turn = 'guest' if role == 'host' else 'host'
-            
-            if data.get('finished'):
-                room.status = 'finished'
-                
-            room.save()
             return JsonResponse({'status': 'success', 'game_version': room.game_version})
             
     except MultiplayerRoom.DoesNotExist:
