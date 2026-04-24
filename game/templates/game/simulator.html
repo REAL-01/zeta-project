@@ -1103,7 +1103,7 @@
                 logMessage(t('sim.defeat_hq'), 'msg-dmg'); 
                 saveGame(true, false); 
                 draw(); 
-                if (GAME_MODE === 'multiplayer') mpSendState(true);
+                if (GAME_MODE === 'multiplayer') sendMpAction({ action: 'sync' });
                 setTimeout(() => alert(t('sim.defeat')), 100); 
                 return true;
             }
@@ -1113,7 +1113,7 @@
                 addXp(100); 
                 saveGame(true, true); 
                 draw(); 
-                if (GAME_MODE === 'multiplayer') mpSendState(true);
+                if (GAME_MODE === 'multiplayer') sendMpAction({ action: 'sync' });
                 setTimeout(() => alert(t('sim.victory')), 100);
                 return true;
             }
@@ -1213,6 +1213,13 @@
 
         async function sendMpAction(actionData) {
             if (GAME_MODE !== 'multiplayer' || !ROOM_ID) return;
+            
+            // Mirror coordinates for guest to server space
+            if (GAME_ROLE === 'guest') {
+                if (actionData.target_x !== undefined) actionData.target_x = GRID_SIZE - 1 - actionData.target_x;
+                if (actionData.target_y !== undefined) actionData.target_y = GRID_SIZE - 1 - actionData.target_y;
+            }
+
             try {
                 const reqBody = JSON.stringify(actionData);
                 const sig = await getZacSignature(reqBody);
