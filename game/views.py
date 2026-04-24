@@ -380,24 +380,56 @@ def api_mp_sync(request, room_id):
             return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
             
         role = 'host' if is_host else 'guest'
+        
+        # Heartbeat update
+        from django.utils import timezone
+        if is_host:
+            room.last_poll_host = timezone.now()
+        else:
+            room.last_poll_guest = timezone.now()
+        
+        # Check for disconnection
+        timeout = timezone.now() - timezone.timedelta(seconds=10)
+        if room.status == 'playing':
+            if room.last_poll_host and room.last_poll_host < timeout:
+                room.status = 'finished'
+                # Add message if not already there
+                sd = json.loads(room.game_data)
+                sd.setdefault("pending_messages", []).append("Host disconnected. Match ended.")
+                room.game_data = json.dumps(sd)
+            elif room.last_poll_guest and room.last_poll_guest < timeout:
+                room.status = 'finished'
+                sd = json.loads(room.game_data)
+                sd.setdefault("pending_messages", []).append("Guest disconnected. Match ended.")
+                room.game_data = json.dumps(sd)
 
         if request.method == 'GET':
             from .engine import process_action
             process_action(room, role, {"action": "sync"})
-            room.save(update_fields=['updated_at'])
+            
+            # Clear pending messages after sending
+            current_data = json.loads(room.game_data)
+            msgs = current_data.get("pending_messages", [])
+            if msgs:
+                current_data["pending_messages"] = []
+                room.game_data = json.dumps(current_data)
+            
+            room.save() # saves polls, status, and cleared messages
 
             return JsonResponse({
                 'status': 'success',
                 'room_status': room.status,
                 'current_turn': room.current_turn,
-                'game_data': room.game_data,
+                'game_data': json.dumps(current_data) if msgs else room.game_data, # send with msgs for this turn
                 'game_version': room.game_version,
                 'guest_joined': room.guest is not None,
                 'your_gold': int(room.host_gold_server) if is_host else int(room.guest_gold_server),
-                'enemy_gold': int(room.guest_gold_server) if is_host else int(room.host_gold_server)
+                'enemy_gold': int(room.guest_gold_server) if is_host else int(room.host_gold_server),
+                'msgs': msgs # Explicitly send messages too
             })
             
         elif request.method == 'POST':
+            room.save(update_fields=['last_poll_host', 'last_poll_guest'])
             raw_body = request.body
             data = json.loads(raw_body)
             
@@ -424,4 +456,3 @@ def api_mp_sync(request, room_id):
             
     except MultiplayerRoom.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Room not found'}, status=404)
-

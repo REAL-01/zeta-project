@@ -57,6 +57,10 @@ class MultiplayerRoom(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Real-time tracking
+    last_poll_host = models.DateTimeField(null=True, blank=True)
+    last_poll_guest = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Room {self.id} ({self.host.username})"

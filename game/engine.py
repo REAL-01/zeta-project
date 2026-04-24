@@ -162,8 +162,12 @@ def process_action(room: MultiplayerRoom, role: str, action: dict):
         
         spawn_y = sy_start
         spawn_coords = None
+        # X-range should be same for host (left to right 0->8) 
+        # For guest, server x=8 is guest x=0 (left). So guest should iterate 8->0.
+        x_range = range(GRID_SIZE) if role == 'host' else range(GRID_SIZE - 1, -1, -1)
+        
         while True:
-            for x in range(GRID_SIZE):
+            for x in x_range:
                 if not any(u['x'] == x and u['y'] == spawn_y for u in units):
                     spawn_coords = (x, spawn_y)
                     break

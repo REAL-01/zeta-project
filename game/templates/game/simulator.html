@@ -779,7 +779,6 @@
                 currentRankIdx++;
                 leveledUp = true;
             }
-            // пахуи
             if (leveledUp) logMessage(`${t('sim.new_rank')} ${t('rank.' + currentRankIdx)}!`, 'msg-sys');
             _ZETA.x = playerXp;
             _ZETA.r = currentRankIdx;
@@ -829,7 +828,6 @@
             let spawnCords = null;
             let y = syStart;
             while(true) {
-                // похй
                 for(let x=0; x<GRID_SIZE; x++) {
                     if (!getUnitAt(x, y)) { spawnCords = {x, y}; break; }
                 }
@@ -860,10 +858,14 @@
                 
                 if (GAME_ROLE === 'host') {
                     turn = 'player';
-                    isMyTurnMp = true;
                     updateTurnIndicator();
-                    // Initial sync to server
-                    sendMpAction({ action: 'sync' });
+                    if (ROOM_STATUS === 'waiting') {
+                         let ind = document.getElementById('turn-indicator');
+                         if (ind) {
+                             ind.className = 'enemy-turn';
+                             ind.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> ' + t('sim.waiting_commander');
+                         }
+                    }
                     mpStartPolling();
                 } else {
                     turn = 'wait';
@@ -1309,7 +1311,7 @@
                     }
                 })
                 .catch(e => console.error('Polling error:', e));
-            }, 1000);
+            }, 500);
         }
 
         function draw() {
@@ -1329,7 +1331,6 @@
                 }
             }
             
-            // похуйй
             if (selectedUnit) {
                 ctx.fillStyle = COLORS.highlightSelect;
                 ctx.fillRect(selectedUnit.x*CELL_SIZE, selectedUnit.y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -1344,7 +1345,6 @@
                         if (nx>=0 && nx<GRID_SIZE && ny>=0 && ny<GRID_SIZE) {
                             let target = getUnitAt(nx, ny);
                             let dist = Math.max(Math.abs(dx), Math.abs(dy));
-                            // похуи
                             if (!target && !selectedUnit.hasMoved && !selectedUnit.hasAttacked && dist <= mr) {
                                 ctx.fillStyle = COLORS.highlightMove;
                                 ctx.fillRect(nx*CELL_SIZE, ny*CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -1363,7 +1363,6 @@
                 let typeData = UNIT_TYPES[u.uClass];
                 
                 let ownerColor = u.type === 'player' ? '#00FF00' : '#F44336';
-                // поохуй
                 if (u.uClass === 'hq') ownerColor = u.type === 'player' ? '#1976D2' : '#C62828';
                 
                 ctx.save();
