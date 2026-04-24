@@ -629,7 +629,7 @@
                     isMyTurnMp = false;
                     _waitingForTurnAck = true;
                     updateTurnIndicator();
-                    mpSendState(false); // false = NOT finished, just end of turn
+                    sendMpAction({ action: "end_turn" }); 
                 } else {
                     turn = 'ai';
                     setTimeout(aiTurn, 500);
@@ -656,14 +656,15 @@
 
         setInterval(() => {
             if (gameState === 'playing') {
-                // In MP, both players get income constantly (real-time strategy feel)
-                let baseIncome = 3;
-                if (hasTech('eco1')) baseIncome += 1;
-                if (hasTech('eco3')) baseIncome += 2;
-                if (hasTech('eco4')) baseIncome += 3;
-                if (currentRankIdx >= 10) baseIncome += 1;
-                playerGold += baseIncome;
-                _ZETA.g = playerGold;
+                if (GAME_MODE !== 'multiplayer') {
+                    let baseIncome = 3;
+                    if (hasTech('eco1')) baseIncome += 1;
+                    if (hasTech('eco3')) baseIncome += 2;
+                    if (hasTech('eco4')) baseIncome += 3;
+                    if (currentRankIdx >= 10) baseIncome += 1;
+                    playerGold += baseIncome;
+                    _ZETA.g = playerGold;
+                }
                 
                 // AI income (only in single player)
                 if (GAME_MODE !== 'multiplayer') {
@@ -861,8 +862,8 @@
                     turn = 'player';
                     isMyTurnMp = true;
                     updateTurnIndicator();
-                    // Send initial state so server has data for guest
-                    mpSendState(false, true);
+                    // Initial sync to server
+                    sendMpAction({ action: 'sync' });
                     mpStartPolling();
                 } else {
                     turn = 'wait';
